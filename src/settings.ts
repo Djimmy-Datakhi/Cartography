@@ -26,23 +26,23 @@
 
 "use strict";
 
-import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
-import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
+import powerbi from "powerbi-visuals-api";
+import DataView = powerbi.DataView;
 
-export class VisualSettings extends DataViewObjectsParser {
-  public dataPoint: dataPointSettings = new dataPointSettings();
+class mapBackgroundSetting {
+  public selectedMap: string;
 }
 
-export class dataPointSettings {
-  // Default color
-  public defaultColor: string = "";
-  // Show all
-  public showAllDataPoints: boolean = true;
-  // Fill
-  public fill: string = "";
-  // Color saturation
-  public fillRule: string = "";
-  // Text Size
-  public fontSize: number = 12;
+export class VisualSettings {
+  public mapBackground: mapBackgroundSetting = new mapBackgroundSetting;
+
+  public parse(dataview:DataView):VisualSettings{
+    var setting:VisualSettings = new VisualSettings;
+
+    setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
+
+    return setting;
+  }
 }
+
 

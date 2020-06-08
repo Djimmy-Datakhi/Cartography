@@ -20,18 +20,22 @@ import * as geoProvider from './geoJsonProvider';
 export class Visual implements IVisual {
     private svg: Selection<SVGElement>;
     private g: Selection<SVGElement>;
-    private target:HTMLElement;
     private path;
-    private fondDeCarte: string;
+    private setting: VisualSettings;
 
     constructor(options: VisualConstructorOptions) {
         this.svg = d3.select(options.element).append('svg');
         this.g = this.svg.append('g');
-        this.target = options.element;
+        this.setting = new VisualSettings;
     }
 
     public update(options: VisualUpdateOptions) {
         var _this = this;
+
+        //parse setting
+        this.setting = this.setting.parse(options.dataViews[0])
+
+        //visual size
         var width = options.viewport.width;
         var height = options.viewport.height;
 
@@ -41,18 +45,24 @@ export class Visual implements IVisual {
         this.g.attr('width',width);
         this.g.attr('height',height);
         
+        //projection
         var projection = d3.geoConicConformal()
             .center([2.454071,46.279229])
             .scale(2600)
             .translate([width/2,height/2]);
 
+        //delete previous drawing
+        this.svg.selectAll('.path').remove()
+
+        //drawing
         this.path = d3.geoPath().projection(projection);
         
         this.g
             .selectAll('path')
-            .data(geoProvider.getJson('regions').features)
+            .data(geoProvider.getJson(this.setting.mapBackground.selectedMap).features)
             .enter()
             .append('path')
+            .attr('class','path')
             .attr('d',this.path)
     }
 
@@ -65,7 +75,7 @@ export class Visual implements IVisual {
                 objectEnumeration.push({
                     objectName: objectName,
                     properties:{
-                        mapBackground: "departements"
+                        mapBackground: this.setting.mapBackground.selectedMap
                     },
                     selector: null
                 })
