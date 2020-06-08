@@ -6,51 +6,56 @@ import powerbi from "powerbi-visuals-api";
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
-import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
-import VisualObjectInstance = powerbi.VisualObjectInstance;
-import DataView = powerbi.DataView;
-import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
+
+import * as d3 from "d3";
+type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import { VisualSettings } from "./settings";
+import geojson from "./region.json";
+
 export class Visual implements IVisual {
-    private target: HTMLElement;
-    private updateCount: number;
-    private settings: VisualSettings;
-    private textNode: Text;
+    private svg: Selection<SVGElement>;
+    private g: Selection<SVGElement>;
+    private target:HTMLElement;
+    private path;
 
     constructor(options: VisualConstructorOptions) {
-        console.log('Visual constructor', options);
+        this.svg = d3.select(options.element).append('svg');
+        this.g = this.svg.append('g');
         this.target = options.element;
-        this.updateCount = 0;
-        if (document) {
-            const new_p: HTMLElement = document.createElement("p");
-            new_p.appendChild(document.createTextNode("Update count:"));
-            const new_em: HTMLElement = document.createElement("em");
-            this.textNode = document.createTextNode(this.updateCount.toString());
-            new_em.appendChild(this.textNode);
-            new_p.appendChild(new_em);
-            this.target.appendChild(new_p);
-        }
     }
 
     public update(options: VisualUpdateOptions) {
-        this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-        console.log('Visual update', options);
-        if (this.textNode) {
-            this.textNode.textContent = (this.updateCount++).toString();
-        }
+        var _this = this;
+        var width = options.viewport.width;
+        var height = options.viewport.height;
+
+        this.svg.attr('width',width);
+        this.svg.attr('height',height);
+
+        this.g.attr('width',width);
+        this.g.attr('height',height);
+        
+        var projection = d3.geoConicConformal()
+            .center([2.454071,46.279229])
+            .scale(2600)
+            .translate([width/2,height/2]);
+
+        this.path = d3.geoPath().projection(projection);
+        
+        this.g
+            .selectAll('path')
+            .data(geojson.features)
+            .enter()
+            .append('path')
+            .attr('d',this.path)
     }
 
-    private static parseSettings(dataView: DataView): VisualSettings {
-        return <VisualSettings>VisualSettings.parse(dataView);
-    }
-
-    /**
-     * This function gets called for each of the objects defined in the capabilities files and allows you to select which of the
-     * objects and properties you want to expose to the users in the property pane.
-     *
-     */
+    /*
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
-        return VisualSettings.enumerateObjectInstances(this.settings || VisualSettings.getDefault(), options);
+
     }
+    */
+
+    public destroy():void{}
 }

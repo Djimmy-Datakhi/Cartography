@@ -8,6 +8,9 @@
         "outDir": "./.tmp/build/",
         "moduleResolution": "node",
         "declaration": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "lib": [
             "es2015",
             "dom"
