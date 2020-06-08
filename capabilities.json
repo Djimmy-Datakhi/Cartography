@@ -50,6 +50,10 @@
                             {
                                 "value": "departements",
                                 "displayName": "departements"
+                            },
+                            {
+                                "value": "arrondissements",
+                                "displayName": "arrondissements"
                             }
                         ]
                     }
