@@ -33,5 +33,28 @@
                 }
             }
         }
-    ]
+    ],
+    "objects": {
+        "map": {
+            "displayName": "fond de carte",
+            "description": "Option du fond de carte",
+            "properties": {
+                "mapBackground":{
+                    "displayName": "choix fond de carte",
+                    "type": {
+                        "enumeration":[
+                            {
+                                "value": "regions",
+                                "displayName": "regions"
+                            },
+                            {
+                                "value": "departements",
+                                "displayName": "departements"
+                            }
+                        ]
+                    }
+                }     
+            }
+        }
+    }
 }

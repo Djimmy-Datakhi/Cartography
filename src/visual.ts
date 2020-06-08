@@ -6,6 +6,9 @@ import powerbi from "powerbi-visuals-api";
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
+import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
+import VisualObjectInstance = powerbi.VisualObjectInstance;
+import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 
 import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
@@ -19,6 +22,7 @@ export class Visual implements IVisual {
     private g: Selection<SVGElement>;
     private target:HTMLElement;
     private path;
+    private fondDeCarte: string;
 
     constructor(options: VisualConstructorOptions) {
         this.svg = d3.select(options.element).append('svg');
@@ -52,11 +56,23 @@ export class Visual implements IVisual {
             .attr('d',this.path)
     }
 
-    /*
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
+        var objectName = options.objectName;
+        var objectEnumeration: VisualObjectInstance[] = [];
 
+        switch(objectName) {
+            case 'map':
+                objectEnumeration.push({
+                    objectName: objectName,
+                    properties:{
+                        mapBackground: "departements"
+                    },
+                    selector: null
+                })
+                break;
+        }
+        return objectEnumeration;
     }
-    */
 
     public destroy():void{}
 }
