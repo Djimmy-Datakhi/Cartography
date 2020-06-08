@@ -11,7 +11,8 @@ import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import { VisualSettings } from "./settings";
-import geojson from "./region.json";
+
+import * as geoProvider from './geoJsonProvider';
 
 export class Visual implements IVisual {
     private svg: Selection<SVGElement>;
@@ -45,7 +46,7 @@ export class Visual implements IVisual {
         
         this.g
             .selectAll('path')
-            .data(geojson.features)
+            .data(geoProvider.getJson('regions').features)
             .enter()
             .append('path')
             .attr('d',this.path)
