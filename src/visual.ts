@@ -19,13 +19,12 @@ import { VisualSettings } from "./settings";
 import * as geoProvider from './geoJsonProvider';
 
 interface DataPoint{
-    feature;
+    mapData;
     name:string;
 }
 
 interface DataModel{
     data:DataPoint[];
-    settings:VisualSettings;
 }
 
 export class Visual implements IVisual {
@@ -34,17 +33,22 @@ export class Visual implements IVisual {
     private path;
 
     private dataModel: DataModel;
+    private settings:VisualSettings;
 
     constructor(options: VisualConstructorOptions) {
         this.svg = d3.select(options.element).append('svg');
         this.g = this.svg.append('g');
+        this.settings = new VisualSettings;
     }
 
     public update(options: VisualUpdateOptions) {
+        console.log("update");
         var _this = this;
 
+        //parse des settings
+        this.settings = VisualSettings.parse(options.dataViews[0]);
         //parse datamodel
-        this.dataModel = Visual.parseDataModel(options.dataViews[0]);
+        this.dataModel = Visual.parseDataModel(options.dataViews[0],this.settings);
 
         //visual size
         var width = options.viewport.width;
@@ -74,7 +78,7 @@ export class Visual implements IVisual {
             .enter()
             .append('path')
             .attr('class','path')
-            .attr('d',function(d){return _this.path(d.feature)})
+            .attr('d',function(d){return _this.path(d.mapData)})
             .attr('id',function(d){return d.name})
     }
 
@@ -87,7 +91,7 @@ export class Visual implements IVisual {
                 objectEnumeration.push({
                     objectName: objectName,
                     properties:{
-                        mapBackground: this.dataModel.settings.mapBackground.selectedMap
+                        mapBackground: this.settings.mapBackground.selectedMap
                     },
                     selector: null
                 })
@@ -97,24 +101,20 @@ export class Visual implements IVisual {
     }
 
     //fonction de parse des datapoints
-    public static parseDataModel(dataView:DataView):DataModel{
-        //parse des settings
-        var setting = new VisualSettings;
-        setting = VisualSettings.parse(dataView);
-
-        //parse des datapoints
+    public static parseDataModel(dataView:DataView,settings:VisualSettings):DataModel{
         var dps:DataPoint[] = [];
-        var geo = geoProvider.getJson(setting.mapBackground.selectedMap) 
+        var map:string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
+        var geo = geoProvider.getJson(map); 
         for(var i = 0; i < geo.features.length; ++i){
             var name = geo.features[i].properties.nom;
             var feat = geo.features[i];
 
-            var dp:DataPoint = {name:name,feature:feat};
+            var dp:DataPoint = {name:name,mapData:feat};
             dps.push(dp);
         }
 
         //resultat
-        var model:DataModel = {data:dps,settings:setting};
+        var model:DataModel = {data:dps};
         return model;
     }
 
