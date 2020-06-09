@@ -100,7 +100,7 @@ export class Visual implements IVisual {
     public static parseDataModel(dataView:DataView):DataModel{
         //parse des settings
         var setting = new VisualSettings;
-        setting = setting.parse(dataView);
+        setting = VisualSettings.parse(dataView);
 
         //parse des datapoints
         var dps:DataPoint[] = [];

@@ -36,7 +36,7 @@ class mapBackgroundSetting {
 export class VisualSettings {
   public mapBackground: mapBackgroundSetting = new mapBackgroundSetting;
 
-  public parse(dataview:DataView):VisualSettings{
+  public static parse(dataview:DataView):VisualSettings{
     var setting:VisualSettings = new VisualSettings;
 
     setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
