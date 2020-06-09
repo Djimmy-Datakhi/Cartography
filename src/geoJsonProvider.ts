@@ -1,6 +1,6 @@
 import departements from "../assets/geoJson/departements.json";
 import regions from "../assets/geoJson/regions.json";
-import arrHDF from "../assets/geoJson/arrondissements-hauts-de-france.json";
+import arrondissements from "../assets/geoJson/arrondissements.json";
 
 export function getJson(name:string){
     var result;
@@ -12,7 +12,7 @@ export function getJson(name:string){
             result = regions;
             break;
         case 'arrondissements' :
-            result = arrHDF;
+            result = arrondissements;
             break;
     }
     return result;
