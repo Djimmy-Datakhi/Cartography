@@ -30,7 +30,7 @@ import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
 
 class mapBackgroundSetting {
-  public selectedMap: string;
+  public selectedMap: string = "regions";
 }
 
 export class VisualSettings {
