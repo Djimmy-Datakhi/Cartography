@@ -48,12 +48,12 @@ export class VisualSettings {
 
     //map background setting
     //setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
-    setting.mapBackground.selectedMap = "regions";
+    setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
 
     //color scale setting
-    setting.scale.rangeLevel = 6;
-    setting.scale.colors.setColor('#FFFF00','#FF0000');
-    setting.scale.colors.setRange(6);
+    setting.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle
+    setting.scale.colors.setColor('#FFFF00','#FF0000'); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
+    setting.scale.colors.setRange(6); //donne a l'échelle de couleur le nombre de catégorie de couleur 
 
     return setting;
   }

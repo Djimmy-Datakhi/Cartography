@@ -1,6 +1,6 @@
 export class util {
     /**
-     * Permet de trouver la valeur d'une forme en fesant une correspondance entre le nom d'une forme, et la liste de toute les formes
+     * Permet de trouver la valeur d'une forme en faisant une correspondance entre le nom d'une forme, et la liste de toute les formes
      * Sachant que l'ordre des formes dans le fichier json et dans le dataview n'est pas le même
      * @param shapeName nom de la forme pour laquel on recherche la valeur
      * @param values lsite des valeurs de toute les formes
@@ -25,7 +25,7 @@ export class util {
     }
 
     /**
-     * retire tous les cahractères spéciaux et les espaces
+     * retire tous les charactères spéciaux et les espaces
      * @param strs tableau de string a simplifier
      */
     public static simplifyStringArray(strs:string[]):string[]{
