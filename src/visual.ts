@@ -10,6 +10,8 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import DataView = powerbi.DataView;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import IColorPalette = powerbi.extensibility.IColorPalette;
 
 import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
@@ -21,6 +23,7 @@ import * as geoProvider from './geoJsonProvider';
 interface DataPoint{
     mapData;
     name:string;
+    color: string;
 }
 
 interface DataModel{
@@ -31,6 +34,7 @@ export class Visual implements IVisual {
     private svg: Selection<SVGElement>;
     private g: Selection<SVGElement>;
     private path;
+    private host: IVisualHost;
 
     private dataModel: DataModel;
     private settings:VisualSettings;
@@ -39,6 +43,7 @@ export class Visual implements IVisual {
         this.svg = d3.select(options.element).append('svg');
         this.g = this.svg.append('g');
         this.settings = new VisualSettings;
+        this.host = options.host;
     }
 
     public update(options: VisualUpdateOptions) {
@@ -48,7 +53,7 @@ export class Visual implements IVisual {
         //parse des settings
         this.settings = VisualSettings.parse(options.dataViews[0]);
         //parse datamodel
-        this.dataModel = Visual.parseDataModel(options.dataViews[0],this.settings);
+        this.dataModel = Visual.parseDataModel(options.dataViews[0],this.settings,this.host);
 
         //visual size
         var width = options.viewport.width;
@@ -80,6 +85,7 @@ export class Visual implements IVisual {
             .attr('class','path')
             .attr('d',function(d){return _this.path(d.mapData)})
             .attr('id',function(d){return d.name})
+            .attr('fill',function(d){return d.color})
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
@@ -101,15 +107,23 @@ export class Visual implements IVisual {
     }
 
     //fonction de parse des datapoints
-    public static parseDataModel(dataView:DataView,settings:VisualSettings):DataModel{
+    public static parseDataModel(dataView:DataView,settings:VisualSettings,host:IVisualHost):DataModel{
         var dps:DataPoint[] = [];
-        var map:string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
-        var geo = geoProvider.getJson(map); 
-        for(var i = 0; i < geo.features.length; ++i){
-            var name = geo.features[i].properties.nom;
-            var feat = geo.features[i];
+        var ColorPalette: IColorPalette = host.colorPalette;
 
-            var dp:DataPoint = {name:name,mapData:feat};
+        //on récupère le fond de carte si il est selectionner ou régions par défaut
+        var map:string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
+        var geo = geoProvider.getJson(map);
+
+        for(var i = 0; i < geo.features.length; ++i){
+            //récupération du nom de la forme
+            var name = geo.features[i].properties.nom;
+            //récupération du tracer de la forme
+            var feat = geo.features[i];
+            //création de la couleur
+            var color = {solid:{color: ColorPalette.getColor(name).value}}
+
+            var dp:DataPoint = {name:name,mapData:feat,color:color.solid.color};
             dps.push(dp);
         }
 
