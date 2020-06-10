@@ -10,10 +10,8 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import DataView = powerbi.DataView;
-import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-import IColorPalette = powerbi.extensibility.IColorPalette;
 
-import * as chroma from "chroma-js"
+import * as chroma from "chroma-js";
 import * as geoProvider from './geoJsonProvider';
 import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
@@ -41,32 +39,24 @@ export class Visual implements IVisual {
     private svg: Selection<SVGElement>;
     private g: Selection<SVGElement>;
     private path;
-    private host: IVisualHost;
 
     private dataModel: DataModel;
     private settings: VisualSettings;
-    private rangeLevel:number;
-    private colorScale:string[];
 
     constructor(options: VisualConstructorOptions) {
         this.svg = d3.select(options.element).append('svg');
         this.g = this.svg.append('g');
         this.settings = new VisualSettings;
-        this.host = options.host;
     }
 
     public update(options: VisualUpdateOptions) {
         console.log("update");
-        var _this = this;
-        
-        this.rangeLevel = 6;
-        this.colorScale = chroma.scale(['#FFFF00','#FF0000']).colors(this.rangeLevel);
-        
+        var _this = this;        
 
         //parse des settings
         this.settings = VisualSettings.parse(options.dataViews[0]);
         //parse datamodel
-        this.dataModel = Visual.parseDataModel(options.dataViews[0], this.settings, this.host);
+        this.dataModel = Visual.parseDataModel(options.dataViews[0], this.settings);
 
         //delete previous drawing
         this.svg.selectAll('.path').remove()
@@ -93,20 +83,20 @@ export class Visual implements IVisual {
             .attr('transform', 'translate('+xpos+','+ypos+')'); 
 
         legend.selectAll('.colorbar')
-            .data(d3.range(this.rangeLevel))
+            .data(d3.range(this.settings.scale.rangeLevel))
             .enter()
             .append('rect')
             .attr('x','0px')
             .attr('y',function(d){return d*40+'px'})
             .attr('height','40px')
             .attr('width','40px')
-            .attr('fill',function(d){return _this.colorScale[d]; })
+            .attr('fill',function(d){return _this.settings.scale.colors.getColor(d); })
 
         //axe gradué
 
         var legendScale = d3.scaleLinear()
             .domain([0,this.dataModel.maxValue])
-            .range([0,this.rangeLevel*40]);
+            .range([0,this.settings.scale.rangeLevel*40]);
         xpos = xpos - 10;
 
 
@@ -155,9 +145,8 @@ export class Visual implements IVisual {
     }
 
     //fonction de parse des datapoints
-    public static parseDataModel(dataView: DataView, settings: VisualSettings, host: IVisualHost): DataModel {
+    public static parseDataModel(dataView: DataView, settings: VisualSettings): DataModel {
         var dps: DataPoint[] = [];
-        var colorPalette: IColorPalette = host.colorPalette;
         var values: number[] = dataView.categorical.values[0].values as number[];
         var categories: string[] = dataView.categorical.categories[0].values as string[];
         var categoriesSimple = util.simplifyStringArray(categories);
@@ -169,11 +158,9 @@ export class Visual implements IVisual {
         var map: string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
         var geo = geoProvider.getJson(map);
 
-        var rangeLevel = 6;
-        var colorScale = chroma.scale(['#FFFF00','#FF0000']).colors(rangeLevel);
         var quantile = d3.scaleQuantile()
-            .domain([min, max])
-            .range(d3.range(rangeLevel));
+            .domain([0, max])
+            .range(d3.range(settings.scale.rangeLevel));
 
         for (var i = 0; i < geo.features.length; ++i) {
             //récupération du nom de la forme
@@ -184,7 +171,7 @@ export class Visual implements IVisual {
             var nameSimple = util.simplifyString(name);
             var value = util.valueMatcher(nameSimple, values, categoriesSimple);
             //création de la couleur
-            var color = colorScale[quantile(value)];
+            var color = settings.scale.colors.getColor(quantile(value));
 
             var dp: DataPoint = { name: name, mapData: feat, value: value, color: color};
             dps.push(dp);

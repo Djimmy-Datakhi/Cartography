@@ -28,18 +28,32 @@
 
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
+import {ColorScale} from "./colorScale";
 
-class mapBackgroundSetting {
+class MapBackgroundSetting {
   public selectedMap: string = "regions";
 }
 
+class ScaleSetting {
+  public rangeLevel: number = 6;
+  public colors:ColorScale = new ColorScale;
+}
+
 export class VisualSettings {
-  public mapBackground: mapBackgroundSetting = new mapBackgroundSetting;
+  public mapBackground: MapBackgroundSetting = new MapBackgroundSetting;
+  public scale: ScaleSetting = new ScaleSetting;
 
   public static parse(dataview:DataView):VisualSettings{
     var setting:VisualSettings = new VisualSettings;
 
-    setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
+    //map background setting
+    //setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
+    setting.mapBackground.selectedMap = "regions";
+
+    //color scale setting
+    setting.scale.rangeLevel = 6;
+    setting.scale.colors.setColor('#FFFF00','#FF0000');
+    setting.scale.colors.setRange(6);
 
     return setting;
   }
