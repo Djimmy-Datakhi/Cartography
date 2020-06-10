@@ -24,6 +24,7 @@ interface DataPoint{
     mapData;
     name:string;
     color: string;
+    value: number;
 }
 
 interface DataModel{
@@ -110,6 +111,9 @@ export class Visual implements IVisual {
     public static parseDataModel(dataView:DataView,settings:VisualSettings,host:IVisualHost):DataModel{
         var dps:DataPoint[] = [];
         var ColorPalette: IColorPalette = host.colorPalette;
+        var values:number[] = dataView.categorical.values[0].values as number[];
+        var categories:string[] = dataView.categorical.categories[0].values as string[];
+        var categoriesSimple = this.simplifyStringArray(categories);
 
         //on récupère le fond de carte si il est selectionner ou régions par défaut
         var map:string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
@@ -120,16 +124,41 @@ export class Visual implements IVisual {
             var name = geo.features[i].properties.nom;
             //récupération du tracer de la forme
             var feat = geo.features[i];
+            //assignation de la valeur
+            var nameSimple = this.simplifyString(name);
+            var value = this.valueMatcher(nameSimple,values,categoriesSimple);
             //création de la couleur
             var color = {solid:{color: ColorPalette.getColor(name).value}}
 
-            var dp:DataPoint = {name:name,mapData:feat,color:color.solid.color};
+            var dp:DataPoint = {name:name,mapData:feat,value:value,color:color.solid.color};
             dps.push(dp);
         }
 
         //resultat
         var model:DataModel = {data:dps};
         return model;
+    }
+
+    static valueMatcher(shapeName:string,values:number[],categories:string[]):number{
+        var result:number=0;
+        for(var index in categories){
+            if(shapeName === categories[index]){
+                result = values[index];
+            }
+        }
+        return result
+    }
+
+    static simplifyString(str:string):string{
+        return str.replace(/[^a-zA-Z ]|\s/g, "");
+    }
+
+    static simplifyStringArray(strs:string[]):string[]{
+        var result:string[] = [];
+        for(var str of strs){
+            result.push(this.simplifyString(str));
+        }
+        return result;
     }
 
     public destroy():void{}
