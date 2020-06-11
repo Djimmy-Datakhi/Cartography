@@ -10,6 +10,9 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import DataView = powerbi.DataView;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import ISelectionId = powerbi.extensibility.ISelectionId;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 
 import * as geoProvider from './geoJsonProvider';
 import * as d3 from "d3";
@@ -23,6 +26,7 @@ interface DataPoint {
     name: string; //nom de la forme
     color: string; //couleur de la forme
     value: number; //valeur de la forme
+    selectionId: ISelectionId; //Id permettant le drilldown
 }
 
 interface DataModel {
@@ -35,6 +39,8 @@ export class Visual implements IVisual {
     private svg: Selection<SVGElement>; //div principale
     private g: Selection<SVGElement>; //div contenant les graphiques
     private path; //fonction qui permet de le tracé des formes
+    private host:IVisualHost;
+    private selectionManager: ISelectionManager;
 
     private dataModel: DataModel;
     private settings: VisualSettings;
@@ -43,6 +49,8 @@ export class Visual implements IVisual {
         this.svg = d3.select(options.element).append('svg');
         this.g = this.svg.append('g');
         this.settings = new VisualSettings;
+        this.host = options.host;
+        this.selectionManager = this.host.createSelectionManager();
     }
 
     public update(options: VisualUpdateOptions) {
@@ -52,7 +60,7 @@ export class Visual implements IVisual {
         //parse des settings
         this.settings = VisualSettings.parse(options.dataViews[0]);
         //parse du datamodel
-        this.dataModel = Visual.parseDataModel(options.dataViews[0], this.settings);
+        this.dataModel = Visual.parseDataModel(options.dataViews[0], this.settings,this.host);
 
         //supprimer le dessin précédent
         this.svg.selectAll('.path').remove() //suppression des formes
@@ -117,6 +125,18 @@ export class Visual implements IVisual {
             .attr('d', function (d) { return _this.path(d.mapData) })
             .attr('id', function (d) { return d.name })
             .attr('fill', function (d) { return d.color })
+            .on('click',function(d){ //gestion du clic droit
+                _this.selectionManager.select(d.selectionId);
+            })
+            .on('contextmenu',function(d){ //gestion du clic gauche
+                const mouseEvent: MouseEvent = d3.event as MouseEvent;
+                _this.selectionManager.showContextMenu(d.selectionId,{
+                    x: mouseEvent.clientX,
+                    y: mouseEvent.clientY
+                });
+                mouseEvent.preventDefault();
+            })
+            //.attr('opacity', function(d){ return d.value != 0 ? 1 : 0}) //si la valeur est 0, on ne le dessine pas
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
@@ -138,13 +158,13 @@ export class Visual implements IVisual {
     }
 
     //fonction de parse des datapoints
-    public static parseDataModel(dataView: DataView, settings: VisualSettings): DataModel {
+    public static parseDataModel(dataView: DataView, settings: VisualSettings,host: IVisualHost): DataModel {
         var dps: DataPoint[] = [];
         var values: number[] = dataView.categorical.values[0].values as number[];
         var categories: string[] = dataView.categorical.categories[0].values as string[];
         var categoriesSimple = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
 
-        //valeur extréme du dataview
+        //valeur extréme du dataview //TODO: chercher la min et max des formes qui sont réellement déssiner
         var minValue: number = dataView.categorical.values[0].minLocal as number;
         var maxValue: number = dataView.categorical.values[0].maxLocal as number;
 
@@ -161,20 +181,27 @@ export class Visual implements IVisual {
         for (var i = 0; i < geo.features.length; ++i) {
             //récupération du nom de la forme
             var name = geo.features[i].properties.nom;
-            //récupération du tracer de la forme
-            var feat = geo.features[i];
-            //assignation de la valeur
+            //récupération de l'index de catégories et values correspondant à la forme traité
             var nameSimple = util.simplifyString(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
-            var value = util.valueMatcher(nameSimple, values, categoriesSimple);
+            var index = util.valueMatcher(nameSimple, categoriesSimple);
+            if(index == -1) //Si l'index retourner est 0, on passe a l'ittération suivante
+                continue
+            //Si il n'y a pas de match, on passe à l'itération suivante
+            //récupération du tracer de la forme
+            var feat = geo.features[i];      
+            //assignation de la valeur
+            var value = values[index];
             //création de la couleur
             var color = settings.scale.colors.getColor(quantile(value)); //on utilise la fonction d'échelle créer précedemment
+            //création de l'id de selection de la forme
+            var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],index).createSelectionId()
 
-            var dp: DataPoint = { name: name, mapData: feat, value: value, color: color};
+            var dp: DataPoint = { name: name, mapData: feat, value: value, color: color,selectionId:selectionId};
             dps.push(dp);
         }
 
         //resultat
-        var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue };
+        var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue};
         return model;
     }
 

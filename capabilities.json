@@ -1,7 +1,7 @@
 {
     "dataRoles": [
         {
-            "displayName": "Departement",
+            "displayName": "Localisation",
             "name": "category",
             "kind": "Grouping"
         },
@@ -11,8 +11,16 @@
             "kind": "Measure"
         }
     ],
+    "drilldown": {
+        "roles": [
+            "category"
+        ]
+    },
     "dataViewMappings": [
         {
+            "conditions": [
+                {"measure": {"max": 1}, "category":{"max": 1}}
+            ],
             "categorical": {
                 "categories": {
                     "for": {

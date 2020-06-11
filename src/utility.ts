@@ -1,19 +1,18 @@
 export class util {
     /**
-     * Permet de trouver la valeur d'une forme en faisant une correspondance entre le nom d'une forme, et la liste de toute les formes
-     * Sachant que l'ordre des formes dans le fichier json et dans le dataview n'est pas le même
-     * @param shapeName nom de la forme pour laquel on recherche la valeur
-     * @param values lsite des valeurs de toute les formes
-     * @param categories liste de toute les formes
+     * Permet de retouver l'index de la categories et values qui correspond a la forme actuel
+     * Elle réalise un match entre le nom de la forme et le nom de la catégorie, lorsqu'il y a un match, il renvoie l'index
+     * L'index retourné est égale à -1 si il n'y a pas de match
+     * @param shapeName nom de la forme
+     * @param categories liste de toute les catégorie
      */
-    public static valueMatcher(shapeName:string,values:number[],categories:string[]):number{
-        var result:number=0;
-        for(var index in categories){
-            if(shapeName === categories[index]){
-                result = values[index];
+    public static valueMatcher(shapeName:string,categories:string[]):number{
+        for(var i = 0; i<categories.length; ++i){
+            if(shapeName === categories[i]){
+                return i;
             }
         }
-        return result
+        return -1;
     }
 
     /**

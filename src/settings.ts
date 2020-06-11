@@ -47,8 +47,8 @@ export class VisualSettings {
     var setting:VisualSettings = new VisualSettings;
 
     //map background setting
-    //setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
-    setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
+    setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
+    //setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
 
     //color scale setting
     setting.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle
