@@ -7,16 +7,16 @@ import arrondissements from "../assets/geoJson/arrondissements.json";
  * Les valeurs possible sont departements, regions et arrondissements.
  * @param name nom de json a récupérer
  */
-export function getJson(name:string){
+export function getJson(name: string) {
     var result;
-    switch(name){
-        case 'regions' :
+    switch (name) {
+        case 'regions':
             result = regions;
             break;
-        case 'departements' :
+        case 'departements':
             result = departements;
             break;
-        case 'arrondissements' :
+        case 'arrondissements':
             result = arrondissements;
             break;
     }

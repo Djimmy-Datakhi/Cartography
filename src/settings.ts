@@ -28,7 +28,7 @@
 
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
-import {ColorScale} from "./colorScale";
+import { ColorScale } from "./colorScale";
 import { util } from "./utility";
 
 class MapBackgroundSetting {
@@ -38,7 +38,7 @@ class MapBackgroundSetting {
 
 class ScaleSetting {
   public rangeLevel: number = 6;
-  public colors:ColorScale = new ColorScale;
+  public colors: ColorScale = new ColorScale;
 }
 
 export class VisualSettings {
@@ -46,19 +46,19 @@ export class VisualSettings {
   public scale: ScaleSetting = new ScaleSetting;
 
 
-  public static parse(dataview:DataView):VisualSettings{
-    var setting:VisualSettings = new VisualSettings;
+  public static parse(dataview: DataView): VisualSettings {
+    var setting: VisualSettings = new VisualSettings;
 
     var metadata = dataview.metadata.columns;
     //map background setting
     setting.mapBackground.drillLevel = util.getDrillLevel(dataview.metadata.columns);
     //setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
-     //setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
+    //setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
     setting.mapBackground.selectedMap = util.getMapName(setting.mapBackground.drillLevel);
 
     //color scale setting
     setting.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle
-    setting.scale.colors.setColor('#FFFF00','#FF0000'); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
+    setting.scale.colors.setColor('#FFFF00', '#FF0000'); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
     setting.scale.colors.setRange(6); //donne a l'échelle de couleur le nombre de catégorie de couleur 
 
     return setting;

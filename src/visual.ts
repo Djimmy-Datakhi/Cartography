@@ -20,7 +20,7 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import { VisualSettings } from "./settings";
 import { util } from "./utility";
-import { svg, ExtendedGeometryCollection } from "d3";
+import { svg, ExtendedGeometryCollection, min } from "d3";
 
 const longitude = 0;
 const latitude = 1;
@@ -37,14 +37,15 @@ interface DataModel {
     data: DataPoint[]; //tableau de datapoint
     minValue: number; //valeur minimal du dataview
     maxValue: number; //valeur maximal du dataview
-    centroid: [number,number];
+    centroid: [number, number];
+    scale: number;
 }
 
 export class Visual implements IVisual {
     private svg: Selection<SVGElement>; //div principale
     private g: Selection<SVGElement>; //div contenant les graphiques
     private path; //fonction qui permet de le tracé des formes
-    private host:IVisualHost;
+    private host: IVisualHost;
     private selectionManager: ISelectionManager;
 
     private dataModel: DataModel;
@@ -65,7 +66,7 @@ export class Visual implements IVisual {
         //parse des settings
         this.settings = VisualSettings.parse(options.dataViews[0]);
         //parse du datamodel
-        this.dataModel = Visual.parseDataModel(options.dataViews[0], this.settings,this.host);
+        this.dataModel = Visual.parseDataModel(options.dataViews[0], this.settings, this.host);
 
         //supprimer le dessin précédent
         this.svg.selectAll('.path').remove() //suppression des formes
@@ -84,31 +85,31 @@ export class Visual implements IVisual {
 
         //TODO: alligner l'échelle avec le graphe
         //échelle de couleur
-        var xpos:number = Math.round(width*0.15);
-        var ypos:number = Math.round(width*0.1);
-        
+        var xpos: number = Math.round(width * 0.15);
+        var ypos: number = Math.round(width * 0.1);
+
         var legend = this.svg.append('g') //on va supperposer les carréer de couleur pour créer notre échelle de couleur
             .attr('id', 'legend')
-            .attr('transform', 'translate('+xpos+','+ypos+')')
+            .attr('transform', 'translate(' + xpos + ',' + ypos + ')')
             .selectAll('.colorbar')
             .data(d3.range(this.settings.scale.rangeLevel))
             .enter()
             .append('rect')
-            .attr('x','0px')
-            .attr('y',function(d){return d*40+'px'})
-            .attr('height','40px')
-            .attr('width','40px')
-            .attr('fill',function(d){return _this.settings.scale.colors.getColor(d); })
+            .attr('x', '0px')
+            .attr('y', function (d) { return d * 40 + 'px' })
+            .attr('height', '40px')
+            .attr('width', '40px')
+            .attr('fill', function (d) { return _this.settings.scale.colors.getColor(d); })
 
         //axe gradué
         var legendScale = d3.scaleLinear() //échelle linéaire pour nous permettre d'afficher les valeurs
-            .domain([0,this.dataModel.maxValue])
-            .range([0,this.settings.scale.rangeLevel*40]);
+            .domain([0, this.dataModel.maxValue])
+            .range([0, this.settings.scale.rangeLevel * 40]);
         xpos = xpos - 10; //Pour décaler l'axe pour qu'il ne soit pas collé à l'échelle
 
         var legendAxis = this.svg.append('g') //création de l'axe
-            .attr('id','legendAxis')
-            .attr('transform','translate('+xpos+','+ypos+')')
+            .attr('id', 'legendAxis')
+            .attr('transform', 'translate(' + xpos + ',' + ypos + ')')
             .call(d3.axisLeft(legendScale).ticks(5));
 
 
@@ -116,8 +117,10 @@ export class Visual implements IVisual {
         var projection = d3.geoConicConformal()
             //.center([2.454071, 46.279229])  //centré sur la france
             .center(this.dataModel.centroid)
-            .scale(2600) //zoom
-            .translate([width / 2, height / 2]); //on place la carte au centre de la div
+            //.scale(2600) //zoom
+            .scale(this.dataModel.scale)
+            // .scale(52000)
+            .translate([width / 2, height / 2]) //on place la carte au centre de la div
 
         //dessin
         this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection
@@ -131,12 +134,12 @@ export class Visual implements IVisual {
             .attr('d', function (d) { return _this.path(d.mapData) })
             .attr('id', function (d) { return d.name })
             .attr('fill', function (d) { return d.color })
-            .on('click',function(d){ //gestion du clic droit
+            .on('click', function (d) { //gestion du clic droit
                 _this.selectionManager.select(d.selectionId);
             })
-            .on('contextmenu',function(d){ //gestion du clic gauche
+            .on('contextmenu', function (d) { //gestion du clic gauche
                 const mouseEvent: MouseEvent = d3.event as MouseEvent;
-                _this.selectionManager.showContextMenu(d.selectionId,{
+                _this.selectionManager.showContextMenu(d.selectionId, {
                     x: mouseEvent.clientX,
                     y: mouseEvent.clientY
                 });
@@ -144,28 +147,28 @@ export class Visual implements IVisual {
             });
     }
 
-/*
-    public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
-        var objectName = options.objectName;
-        var objectEnumeration: VisualObjectInstance[] = [];
-
-        switch (objectName) {
-            case 'map':
-                objectEnumeration.push({
-                    objectName: objectName,
-                    properties: {
-                        mapBackground: this.settings.mapBackground.selectedMap //choix du fond de carte, est utiliser pour l'appel de geoJsonProvider
-                    },
-                    selector: null
-                })
-                break;
+    /*
+        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
+            var objectName = options.objectName;
+            var objectEnumeration: VisualObjectInstance[] = [];
+    
+            switch (objectName) {
+                case 'map':
+                    objectEnumeration.push({
+                        objectName: objectName,
+                        properties: {
+                            mapBackground: this.settings.mapBackground.selectedMap //choix du fond de carte, est utiliser pour l'appel de geoJsonProvider
+                        },
+                        selector: null
+                    })
+                    break;
+            }
+            return objectEnumeration;
         }
-        return objectEnumeration;
-    }
- */
+     */
 
     //fonction de parse des datapoints
-    public static parseDataModel(dataView: DataView, settings: VisualSettings,host: IVisualHost): DataModel {
+    public static parseDataModel(dataView: DataView, settings: VisualSettings, host: IVisualHost): DataModel {
         var dps: DataPoint[] = [];
         var values: number[] = dataView.categorical.values[0].values as number[];
         var categories: string[] = dataView.categorical.categories[0].values as string[];
@@ -178,48 +181,55 @@ export class Visual implements IVisual {
         //on récupère le fond de carte si il y en a un de selectionner ou régions par défaut
         var map: string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
         var geo = geoProvider.getJson(map);
-        
 
         //on créer la fonction d'échelle d3. Cela permettras de définir la couleur de la forme en fonction de la valeur
         var quantile = d3.scaleQuantile()
             .domain([0, maxValue])
             .range(d3.range(settings.scale.rangeLevel));
 
+        //on va chercher les bordure min et max pour trouver le zoom adéquat et le centre de notre map
+        var maxBound: [number, number] = [-180, -90];
+        var minBound: [number, number] = [180, 90];
 
-        var maxCoord:[number,number] = [-180,-90];
-        var minCoord:[number,number] = [180,90];
         //on boucle sur les formes, pour récupérer les informations
         for (var i = 0; i < geo.features.length; ++i) {
             //récupération du nom de la forme
             var name = geo.features[i].properties.nom;
+
             //récupération de l'index de catégories et values correspondant à la forme traité
             var nameSimple = util.simplifyString(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
             var index = util.valueMatcher(nameSimple, categoriesSimple);
-            if(index == -1) //Si l'index retourner est 0, on passe a l'ittération suivante
+            if (index == -1) //Si l'index retourner est 0, on passe a l'ittération suivante
                 continue
-            //Si il n'y a pas de match, on passe à l'itération suivante
+
             //récupération du tracer de la forme
             var feat = geo.features[i];
-            //on test si on trouve les coordonnée gps max et min, cela nous donneras les boundaries de la map
-            var coord:[number,number] = d3.geoCentroid(feat);
-            maxCoord = util.getMaxCoord(maxCoord,coord);
-            minCoord = util.getminCoord(minCoord,coord);      
+
+            //on cherche si on a trouvé une nouvelles bordure
+            var bound: [[number, number], [number, number]] = d3.geoBounds(feat);
+            maxBound = util.getMaxCoord(maxBound, bound[1]);
+            minBound = util.getMinCoord(minBound, bound[0]);
+
             //assignation de la valeur
             var value = values[index];
+
             //création de la couleur
             var color = settings.scale.colors.getColor(quantile(value)); //on utilise la fonction d'échelle créer précedemment
-            //création de l'id de selection de la forme
-            var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],index).createSelectionId()
 
-            var dp: DataPoint = { name: name, mapData: feat, value: value, color: color,selectionId:selectionId};
+            //création de l'id de selection de la forme
+            var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index).createSelectionId()
+
+            var dp: DataPoint = { name: name, mapData: feat, value: value, color: color, selectionId: selectionId };
             dps.push(dp);
         }
 
-        //a partir des boundaries précedemment calculé, on définir le centroid
-        var centroid:[number,number] = util.getCentroid(maxCoord,minCoord);
+        //a partir des bordures précedemment calculé, on définir le centroid
+        var centroid: [number, number] = util.getCentroid(maxBound, minBound);
+        //calcul du zoom en fonction des bordures
+        var scale = util.getZoomScale(maxBound, minBound);
 
         //resultat
-        var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue, centroid:centroid};
+        var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue, centroid: centroid, scale: scale };
         return model;
     }
 

@@ -1,9 +1,9 @@
 import * as chroma from "chroma-js"
 
-export class ColorScale{
-    private scale:string[] = [];
+export class ColorScale {
+    private scale: string[] = [];
 
-    private range:number = 0;
+    private range: number = 0;
     private startColor: string;
     private endColor: string;
 
@@ -12,8 +12,8 @@ export class ColorScale{
      * @param start Couleur de départ, doit être sous forme hexadécimal
      * @param end Couleur d'arrivé, doit être sous forme hexadécimal
      */
-    public setColor(start:string,end:string){
-        if(this.checkHexa(start,end)){
+    public setColor(start: string, end: string) {
+        if (this.checkHexa(start, end)) {
             this.startColor = start;
             this.endColor = end;
         }
@@ -25,8 +25,8 @@ export class ColorScale{
      * Permet de définir le nombre de couleur différente pour composer l'échelle de couleur.
      * @param range le nombre de couleur différente sur l'échelle. Doit être supérieur ou égale à deux
      */
-    public setRange(range:number){
-        if(range <=1)
+    public setRange(range: number) {
+        if (range <= 1)
             console.log("setRange : le range doit être supérieur ou égale à deux");
         else
             this.range = range;
@@ -38,16 +38,16 @@ export class ColorScale{
      * Pour définir le nombre de couleurs, utilise setRange
      * Cette fonction est appelé automatiquement lorsqu'on appelle la fonction getColor et que l'échelle de couleur n'est pas générer.
      */
-    public generateScale(){
-        if(!this.startColor || !this.endColor){
+    public generateScale() {
+        if (!this.startColor || !this.endColor) {
             console.log("generateScale : les couleurs de l'échelle ne sont pas définis");
             return;
         }
-        if(!this.range){
+        if (!this.range) {
             console.log("generateScale : le range n'est pas définis");
             return;
         }
-        this.scale = chroma.scale([this.startColor,this.endColor]).colors(this.range);
+        this.scale = chroma.scale([this.startColor, this.endColor]).colors(this.range);
     }
 
     /**
@@ -56,12 +56,12 @@ export class ColorScale{
      * Si l'échelle de couleur n'a pas encore été généré, il la génère automatiquement (voir generateScale())
      * @param value index de la couleur voulu. doit être positif, et inférieur au nombre de couleur
      */
-    public getColor(value:number):string{
-        if(value >= this.range || value < 0){
+    public getColor(value: number): string {
+        if (value >= this.range || value < 0) {
             console.log("getColor : la valeur est incorrecte");
             return "#000000";
         }
-        if(this.scale.length === 0){
+        if (this.scale.length === 0) {
             this.generateScale();
         }
         return this.scale[value];
@@ -72,9 +72,9 @@ export class ColorScale{
      * @param str1 premier string
      * @param str2 deuxième string
      */
-    private checkHexa(str1:string, str2:string):boolean{
-        var regex:RegExp = /#[0-9A-Fa-f]{6}/g;
-        var result:boolean = true;
+    private checkHexa(str1: string, str2: string): boolean {
+        var regex: RegExp = /#[0-9A-Fa-f]{6}/g;
+        var result: boolean = true;
         result = regex.test(str1) && result;
         regex.lastIndex = 0;
         result = regex.test(str2) && result;
