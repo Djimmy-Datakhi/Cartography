@@ -51,10 +51,8 @@ export class VisualSettings {
 
     var metadata = dataview.metadata.columns;
     //map background setting
-    setting.mapBackground.drillLevel = util.getDrillLevel(dataview.metadata.columns);
-    //setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
-    //setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
-    setting.mapBackground.selectedMap = util.getMapName(setting.mapBackground.drillLevel);
+    setting.mapBackground.drillLevel = util.getDrillLevel(dataview.metadata.columns); //donne a quel niveau de drilldown on se trouve (commence a 0)
+    setting.mapBackground.selectedMap = util.getMapName(setting.mapBackground.drillLevel); //donne la carte a utiliser en fonction du niveau de drilldown
 
     //color scale setting
     setting.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle

@@ -115,11 +115,8 @@ export class Visual implements IVisual {
 
         //projection
         var projection = d3.geoConicConformal()
-            //.center([2.454071, 46.279229])  //centré sur la france
-            .center(this.dataModel.centroid)
-            //.scale(2600) //zoom
-            .scale(this.dataModel.scale)
-            // .scale(52000)
+            .center(this.dataModel.centroid) //centre de la forme
+            .scale(this.dataModel.scale) //zoom
             .translate([width / 2, height / 2]) //on place la carte au centre de la div
 
         //dessin
@@ -131,9 +128,9 @@ export class Visual implements IVisual {
             .enter()
             .append('path')
             .attr('class', 'path')
-            .attr('d', function (d) { return _this.path(d.mapData) })
-            .attr('id', function (d) { return d.name })
-            .attr('fill', function (d) { return d.color })
+            .attr('d', function (d) { return _this.path(d.mapData) }) //dessin de la forme
+            .attr('id', function (d) { return d.name }) //nom de la forme
+            .attr('fill', function (d) { return d.color }) //couleur
             .on('click', function (d) { //gestion du clic droit
                 _this.selectionManager.select(d.selectionId);
             })
