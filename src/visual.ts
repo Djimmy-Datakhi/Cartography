@@ -136,9 +136,9 @@ export class Visual implements IVisual {
                 });
                 mouseEvent.preventDefault();
             })
-            //.attr('opacity', function(d){ return d.value != 0 ? 1 : 0}) //si la valeur est 0, on ne le dessine pas
     }
 
+/*
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
         var objectName = options.objectName;
         var objectEnumeration: VisualObjectInstance[] = [];
@@ -156,6 +156,7 @@ export class Visual implements IVisual {
         }
         return objectEnumeration;
     }
+ */
 
     //fonction de parse des datapoints
     public static parseDataModel(dataView: DataView, settings: VisualSettings,host: IVisualHost): DataModel {
@@ -171,6 +172,7 @@ export class Visual implements IVisual {
         //on récupère le fond de carte si il y en a un de selectionner ou régions par défaut
         var map: string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
         var geo = geoProvider.getJson(map);
+        
 
         //on créer la fonction d'échelle d3. Cela permettras de définir la couleur de la forme en fonction de la valeur
         var quantile = d3.scaleQuantile()

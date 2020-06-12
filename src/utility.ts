@@ -1,3 +1,5 @@
+import powerbi from "powerbi-visuals-api";
+
 export class util {
     /**
      * Permet de retouver l'index de la categories et values qui correspond a la forme actuel
@@ -33,5 +35,28 @@ export class util {
             result.push(util.simplifyString(str));
         }
         return result;
+    }
+
+    //TODO:documentation
+    public static getDrillLevel(metadata:powerbi.DataViewMetadataColumn[]):number{
+        var result:number = 0;
+        for(var i=0;i< metadata.length;++i){
+            if(metadata[i].roles.category){
+                if(result < metadata[i].index)
+                    result = metadata[i].index;
+            }
+        }
+        if(result >2)
+            return 2;
+        return result;
+    }
+
+    public static getMapName(drillLevel:number):string{
+        if(drillLevel === 0)
+            return 'regions';
+        if(drillLevel === 1)
+            return 'departements';
+        if(drillLevel === 2)
+            return 'arrondissements';
     }
 }

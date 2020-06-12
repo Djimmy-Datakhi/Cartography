@@ -29,9 +29,11 @@
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
 import {ColorScale} from "./colorScale";
+import { util } from "./utility";
 
 class MapBackgroundSetting {
   public selectedMap: string = "regions";
+  public drillLevel: number = 0;
 }
 
 class ScaleSetting {
@@ -43,12 +45,16 @@ export class VisualSettings {
   public mapBackground: MapBackgroundSetting = new MapBackgroundSetting;
   public scale: ScaleSetting = new ScaleSetting;
 
+
   public static parse(dataview:DataView):VisualSettings{
     var setting:VisualSettings = new VisualSettings;
 
+    var metadata = dataview.metadata.columns;
     //map background setting
-    setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
-    //setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
+    setting.mapBackground.drillLevel = util.getDrillLevel(dataview.metadata.columns);
+    //setting.mapBackground.selectedMap = dataview.metadata.objects["map"]["mapBackground"] as string;
+     //setting.mapBackground.selectedMap = "regions"; //sélection du fond de carte / découpage, est a utiliser en lien avec le geoJsonProvider
+    setting.mapBackground.selectedMap = util.getMapName(setting.mapBackground.drillLevel);
 
     //color scale setting
     setting.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle
