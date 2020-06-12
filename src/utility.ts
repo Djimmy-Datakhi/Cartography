@@ -1,4 +1,5 @@
 import powerbi from "powerbi-visuals-api";
+import { max } from "d3";
 
 export class util {
     /**
@@ -58,5 +59,17 @@ export class util {
             return 'departements';
         if(drillLevel === 2)
             return 'arrondissements';
+    }
+
+    public static getMaxCoord(old:[number,number],cur:[number,number]):[number,number]{
+        return [Math.max(old[0],cur[0]),Math.max(old[1],cur[1])];
+    }
+
+    public static getminCoord(old:[number,number],cur:[number,number]):[number,number]{
+        return [Math.min(old[0],cur[0]),Math.min(old[1],cur[1])];
+    }
+
+    public static getCentroid(max:[number,number],min:[number,number]):[number,number]{
+        return [(max[0] + min[0]) / 2 , (max[1] + min[1]) / 2];
     }
 }

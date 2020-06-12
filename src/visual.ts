@@ -20,6 +20,10 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import { VisualSettings } from "./settings";
 import { util } from "./utility";
+import { svg, ExtendedGeometryCollection } from "d3";
+
+const longitude = 0;
+const latitude = 1;
 
 interface DataPoint {
     mapData; //donné de la forme géographique
@@ -33,6 +37,7 @@ interface DataModel {
     data: DataPoint[]; //tableau de datapoint
     minValue: number; //valeur minimal du dataview
     maxValue: number; //valeur maximal du dataview
+    centroid: [number,number];
 }
 
 export class Visual implements IVisual {
@@ -109,10 +114,11 @@ export class Visual implements IVisual {
 
         //projection
         var projection = d3.geoConicConformal()
-            .center([2.454071, 46.279229])  //centré sur la france
+            //.center([2.454071, 46.279229])  //centré sur la france
+            .center(this.dataModel.centroid)
             .scale(2600) //zoom
             .translate([width / 2, height / 2]); //on place la carte au centre de la div
-        
+
         //dessin
         this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection
 
@@ -135,7 +141,7 @@ export class Visual implements IVisual {
                     y: mouseEvent.clientY
                 });
                 mouseEvent.preventDefault();
-            })
+            });
     }
 
 /*
@@ -165,7 +171,7 @@ export class Visual implements IVisual {
         var categories: string[] = dataView.categorical.categories[0].values as string[];
         var categoriesSimple = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
 
-        //valeur extréme du dataview //TODO: chercher la min et max des formes qui sont réellement déssiner
+        //valeur extréme du dataview
         var minValue: number = dataView.categorical.values[0].minLocal as number;
         var maxValue: number = dataView.categorical.values[0].maxLocal as number;
 
@@ -179,6 +185,9 @@ export class Visual implements IVisual {
             .domain([0, maxValue])
             .range(d3.range(settings.scale.rangeLevel));
 
+
+        var maxCoord:[number,number] = [-180,-90];
+        var minCoord:[number,number] = [180,90];
         //on boucle sur les formes, pour récupérer les informations
         for (var i = 0; i < geo.features.length; ++i) {
             //récupération du nom de la forme
@@ -190,7 +199,11 @@ export class Visual implements IVisual {
                 continue
             //Si il n'y a pas de match, on passe à l'itération suivante
             //récupération du tracer de la forme
-            var feat = geo.features[i];      
+            var feat = geo.features[i];
+            //on test si on trouve les coordonnée gps max et min, cela nous donneras les boundaries de la map
+            var coord:[number,number] = d3.geoCentroid(feat);
+            maxCoord = util.getMaxCoord(maxCoord,coord);
+            minCoord = util.getminCoord(minCoord,coord);      
             //assignation de la valeur
             var value = values[index];
             //création de la couleur
@@ -202,8 +215,11 @@ export class Visual implements IVisual {
             dps.push(dp);
         }
 
+        //a partir des boundaries précedemment calculé, on définir le centroid
+        var centroid:[number,number] = util.getCentroid(maxCoord,minCoord);
+
         //resultat
-        var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue};
+        var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue, centroid:centroid};
         return model;
     }
 
