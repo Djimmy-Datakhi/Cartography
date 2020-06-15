@@ -63,7 +63,13 @@
                             }
                         }
                     }                    
-                }    
+                },
+                "colorRange":{
+                    "displayName": "Niveau de couleur",
+                    "type": {
+                        "numeric": true
+                    }
+                }
             }
         }
     }

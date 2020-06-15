@@ -79,7 +79,8 @@ export class Visual implements IVisual {
                             solid: {
                                 color: this.settings.color.maxColor.solid.color
                             }
-                        }
+                        },
+                        colorRange: this.settings.scale.rangeLevel
                     },
                     selector: null
                 })

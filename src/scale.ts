@@ -46,7 +46,7 @@ export class Scale {
         this.div.append('g')
             .attr('id', 'legendAxis')
             .attr('transform', 'translate(' + x + ',' + y + ')')
-            .call(d3.axisLeft(legendScale).ticks(5));
+            .call(d3.axisLeft(legendScale).ticks(settings.scale.rangeLevel - 1));
 
             }
 }

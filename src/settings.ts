@@ -83,14 +83,15 @@ export class VisualSettings {
     this.mapBackground.selectedMap = util.getMapName(this.mapBackground.drillLevel); //donne la carte a utiliser en fonction du niveau de drilldown
 
     //color setting
-    this.color.minColor = util.getValue(dataview.metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
-    this.color.maxColor = util.getValue(dataview.metadata.objects,"couleur","maxColor",{solid:{color:"#FF0000"}});
+    this.color.minColor = util.getValue(metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
+    this.color.maxColor = util.getValue(metadata.objects,"couleur","maxColor",{solid:{color:"#FF0000"}});
+
 
     //color scale setting
     console.log(this.color.minColor.solid.color);
-    this.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle
+    this.scale.rangeLevel = util.getValue(metadata.objects,"couleur","colorRange",6); //donne le nombre de "catégorie" de couleur pour l'échelle
     this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
-    this.scale.colors.setRange(6); //donne a l'échelle de couleur le nombre de catégorie de couleur 
+    this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 
     this.scale.colors.generateScale(); //on génère l'échelle de couleur
   }
 }
