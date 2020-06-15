@@ -36,7 +36,6 @@ export class ColorScale {
      * Permet de générer l'échelle de couleur. Il faut que la couleur de départ, d'arrivé et le nombre de couleurs soient définis.
      * Pour définir les couleurs, utilise setColor.
      * Pour définir le nombre de couleurs, utilise setRange
-     * Cette fonction est appelé automatiquement lorsqu'on appelle la fonction getColor et que l'échelle de couleur n'est pas générer.
      */
     public generateScale() {
         if (!this.startColor || !this.endColor) {
@@ -53,7 +52,6 @@ export class ColorScale {
     /**
      * Permet d'accéder a une couleur dans l'échelle de couleur via son index.
      * Est a utiliser en conjonction avec une scale d3.js (ex : getColor(quantile(value)) ).
-     * Si l'échelle de couleur n'a pas encore été généré, il la génère automatiquement (voir generateScale())
      * @param value index de la couleur voulu. doit être positif, et inférieur au nombre de couleur
      */
     public getColor(value: number): string {

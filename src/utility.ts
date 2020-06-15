@@ -1,5 +1,6 @@
 import powerbi from "powerbi-visuals-api";
-import { max } from "d3";
+import DataViewObjects = powerbi.DataViewObjects;
+
 
 export class util {
     /**
@@ -109,5 +110,19 @@ export class util {
         var x = (max[0] - min[0] + max[1] - min[1]);
         var scale = 18000 * Math.pow(x, -0.6);
         return scale === Infinity ? 80000 : scale;
+    }
+
+    //TODO: docu
+    public static getValue<T>(objects: DataViewObjects, objectName: string, propertyName: string, defaultValue: T): T {
+        if (objects) {
+            let object = objects[objectName];
+            if (object) {
+                let property: T = <T>object[propertyName];
+                if (property !== undefined) {
+                    return property;
+                }
+            }
+        }
+        return defaultValue;
     }
 }
