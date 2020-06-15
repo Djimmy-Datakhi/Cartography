@@ -43,7 +43,7 @@ export class Visual implements IVisual {
         console.log("update");
 
         //parse des settings
-        this.settings = VisualSettings.parse(options.dataViews[0]);
+        this.settings.parse(options.dataViews[0]);
         //parse du datamodel     
         this.dataModel = model.parseDataModel(options.dataViews[0],this.settings,this.host);
         //Attribution de la taille a la div principal
@@ -58,6 +58,35 @@ export class Visual implements IVisual {
         //dessin de la carte
         this.map.draw(this.dataModel,this.settings,this.selectionManager,width/2,height/2);
         
+    }
+
+    public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
+        var objectName = options.objectName;
+        var objectEnumeration: VisualObjectInstance[] = [];
+
+        switch (objectName) {
+            case 'couleur':
+                objectEnumeration.push({
+                    objectName: objectName,
+                    displayName: objectName,
+                    properties:{
+                        minColor:{
+                            solid: {
+                                color: this.settings.color.minColor.solid.color
+                            }
+                        },
+                        maxColor:{
+                            solid: {
+                                color: this.settings.color.maxColor.solid.color
+                            }
+                        },
+                        colorRange: this.settings.scale.rangeLevel
+                    },
+                    selector: null
+                })
+                break;
+        }
+        return objectEnumeration;
     }
 
     /*

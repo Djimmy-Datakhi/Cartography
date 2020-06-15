@@ -28,38 +28,71 @@
 
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
+import Fill = powerbi.Fill;
 import { ColorScale } from "./colorScale";
 import { util } from "./utility";
 
+
 class MapBackgroundSetting {
-  public selectedMap: string = "regions";
-  public drillLevel: number = 0;
+  public selectedMap: string;
+  public drillLevel: number;
+
+  constructor() {
+    this.selectedMap = "regions";
+    this.drillLevel = 0;
+  }
 }
 
 class ScaleSetting {
-  public rangeLevel: number = 6;
-  public colors: ColorScale = new ColorScale;
+  public rangeLevel: number;
+  public colors: ColorScale ;
+
+  constructor() {
+    this.rangeLevel = 6;
+    this.colors = new ColorScale;
+  }
+}
+
+class ColorSetting{
+  public minColor:Fill;
+  public maxColor:Fill;
+
+  constructor() {
+    this.minColor = {solid:{color:"#FFFF00"}};
+    this.maxColor = {solid:{color:"#FF0000"}};
+  }
 }
 
 export class VisualSettings {
-  public mapBackground: MapBackgroundSetting = new MapBackgroundSetting;
-  public scale: ScaleSetting = new ScaleSetting;
+  public mapBackground: MapBackgroundSetting;
+  public color: ColorSetting;
+  public scale: ScaleSetting;
 
+  constructor() {
+    this.mapBackground= new MapBackgroundSetting;
+    this.color = new ColorSetting;
+    this.scale= new ScaleSetting;
+  }
 
-  public static parse(dataview: DataView): VisualSettings {
-    var setting: VisualSettings = new VisualSettings;
+  public parse(dataview: DataView){
+    //var setting: VisualSettings = new VisualSettings;
 
-    var metadata = dataview.metadata.columns;
+    var metadata = dataview.metadata;
     //map background setting
-    setting.mapBackground.drillLevel = util.getDrillLevel(dataview.metadata.columns); //donne a quel niveau de drilldown on se trouve (commence a 0)
-    setting.mapBackground.selectedMap = util.getMapName(setting.mapBackground.drillLevel); //donne la carte a utiliser en fonction du niveau de drilldown
+    this.mapBackground.drillLevel = util.getDrillLevel(metadata.columns); //donne a quel niveau de drilldown on se trouve (commence a 0)
+    this.mapBackground.selectedMap = util.getMapName(this.mapBackground.drillLevel); //donne la carte a utiliser en fonction du niveau de drilldown
+
+    //color setting
+    this.color.minColor = util.getValue(metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
+    this.color.maxColor = util.getValue(metadata.objects,"couleur","maxColor",{solid:{color:"#FF0000"}});
+
 
     //color scale setting
-    setting.scale.rangeLevel = 6; //donne le nombre de "catégorie" de couleur pour l'échelle
-    setting.scale.colors.setColor('#FFFF00', '#FF0000'); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
-    setting.scale.colors.setRange(6); //donne a l'échelle de couleur le nombre de catégorie de couleur 
-
-    return setting;
+    console.log(this.color.minColor.solid.color);
+    this.scale.rangeLevel = util.getValue(metadata.objects,"couleur","colorRange",6); //donne le nombre de "catégorie" de couleur pour l'échelle
+    this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
+    this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 
+    this.scale.colors.generateScale(); //on génère l'échelle de couleur
   }
 }
 

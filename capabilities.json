@@ -38,5 +38,39 @@
                 }
             }
         }
-    ]
+    ],
+    "objects": {
+        "couleur": {
+            "displayName": "couleur",
+            "description": "Choix des couleurs",
+            "properties": {
+                "minColor":{
+                    "displayName": "Couleur Minimal",
+                    "type": {
+                        "fill" :{
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }                    
+                },
+                "maxColor":{
+                    "displayName": "Couleur Maximal",
+                    "type": {
+                        "fill" :{
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }                    
+                },
+                "colorRange":{
+                    "displayName": "Niveau de couleur",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        }
+    }
 }
