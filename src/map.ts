@@ -6,6 +6,7 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import {DataModel} from "./dataModel"
 import { VisualSettings } from "./settings";
+import { util } from "./utility";
 
 export class Map {
     private div:Selection<SVGElement>;
@@ -19,7 +20,7 @@ export class Map {
         this.div.selectAll('.path').remove();
     }
 
-    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number){
+    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number,viewPortW:number,viewPortH){
         var _this = this;
 
         //supprimer le dessin précédent
@@ -27,23 +28,11 @@ export class Map {
 
         //creation de la fonction de traçage
         var projection = d3.geoConicConformal()
-        .center([2.454071, 46.279229]) //centre de la forme
+        .center([2.454071, 46.279229]) //centre de la france
         .scale(2600) //zoom
         .translate([x, y]) //on place la carte au centre de la div
 
-        this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection
-
-        var xtot = 0;
-        var ytot = 0;
-        var len = dataModel.data.length;
-        for(var i = 0; i <len  ;++i){
-            var center = this.path.centroid(dataModel.data[i].mapData);
-            xtot = xtot + center[0];
-            ytot = ytot + center[1];
-        }
-        var centroid = [x - (xtot/len), y - (ytot/len)]; 
-        console.log(x+" "+y);
-        console.log(centroid[0]+ " " + centroid[1]);
+        this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection        
         
         //dessin
         this.div //on dessine les formes une par une
@@ -66,7 +55,20 @@ export class Map {
                 });
                 mouseEvent.preventDefault();
             });
+        
+        var scale = settings.mapBackground.drillLevel * 2;
+        scale = scale == 0 ? 1 : scale;
+        var translate = util.getTranslation(dataModel,this.path,x,y);
+        console.log(translate[0]+" "+translate[1]);
+        //console.log(util.getZoomScale(dataModel,this.path,viewPortW,viewPortH));
+        
+        //this.div.transition().duration(750).attr("transform","scale("+scale+")");
 
-        this.div.transition().duration(750).attr("transform","translate("+centroid[0]+","+centroid[1]+")scale("+1+")");
+        this.div
+        .transition().duration(750)
+        .attr("transform","translate("+(-(scale-1)*x +translate[0]*scale)+","+(-(scale-1)*y + translate[1]*scale)+")scale("+scale+")")
+        
+       // .transition().duration(750).attr("transform","scale("+scale+")");
+
     }
 }

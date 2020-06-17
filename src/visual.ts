@@ -56,7 +56,7 @@ export class Visual implements IVisual {
         //dessin de l'échelle de couleur
         this.colorScale.draw(this.dataModel,this.settings,this.selectionManager,width*0.15,height*0.1);
         //dessin de la carte
-        this.map.draw(this.dataModel,this.settings,this.selectionManager,width/2,height/2);
+        this.map.draw(this.dataModel,this.settings,this.selectionManager,width/2,height/2,width,height);
         
     }
 
