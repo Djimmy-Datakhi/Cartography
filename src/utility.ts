@@ -1,5 +1,6 @@
 import powerbi from "powerbi-visuals-api";
 import DataViewObjects = powerbi.DataViewObjects;
+import { DataModel } from "./dataModel";
 
 
 export class util {
@@ -91,28 +92,61 @@ export class util {
     }
 
     /**
-     * permet d'avoir le centre geographique d'une zone (carré) grace aux bordures
-     * @param max bordure maximal (la plus en haut à droite)
-     * @param min bordure minimal (la plus en bas à gauche)
+     * permet d'avoir le vecteur de translation a appliquer pour placer la forme au centre de la div  en prennant en compte le zoom.
+     * pour cela on calcul le vecteur entre le centre de la div et de la forme.
+     * Ce vecteursera multiplier par le scale. Pour compensé le décentrage du scale,on ajoute (scale - 1)*c où c est le centre de la div.
+     * @param dataModel model de donnée, nous permet de trouver le centre de la forme
+     * @param path fonction de path, pour calculer le centre de la forme
+     * @param x centre de la div
+     * @param y centre de la div
+     * @param scale facteur de zoom²
      */
-    public static getCentroid(max: [number, number], min: [number, number]): [number, number] {
-        return [(max[0] + min[0]) / 2, (max[1] + min[1]) / 2];
+    public static getTranslation(dataModel: DataModel, path, x: number, y: number, scale: number): [number, number] {
+        var xtot = 0;
+        var ytot = 0;
+        var len = dataModel.data.length;
+        for (var i = 0; i < len; ++i) {
+            var center = path.centroid(dataModel.data[i].mapData);
+            xtot = xtot + center[0];
+            ytot = ytot + center[1];
+        }
+        var translate: [number, number] = [x - (xtot / len), y - (ytot / len)]; // vecteur de translation entre le centroid de la forme et celle de la div
+        translate = [(-(scale - 1) * x + translate[0] * scale), (-(scale - 1) * y + translate[1] * scale)]; //recentrage en prenant en compte le scale
+        return translate;
     }
 
     /**
-     * Permet d'avoir le zoom approprié, la valeur est a utiliser lorsque l'on définie la projection, dans le .scale(value).
-     * la fonction a été définie par régression manuellement, c'est de la magie cherche pas.
-     * /!\ peut faire n'importe quoi pour les formes trop grandes ou trop petite, le minimum est de la taille de paris, le maximum celle de la france (+ corse)
-     * @param max bordure maximal (la plus en haut à droite)
-     * @param min bordure minimal (la plus en bas à gauche)
+     * Permet de calculer le zoom, en fonction de la différence de taille entre la forme et la div.
+     * Ne peut pas retourné un zoom inférieur à 1.
+     * @param dataModel model de donnée, pour trouver la taille de la forme
+     * @param path fonction de path, pour calculer la taille de la forme
+     * @param width longueur de la div
+     * @param height Largeur de la div
      */
-    public static getZoomScale(max: [number, number], min: [number, number]): number {
-        var x = (max[0] - min[0] + max[1] - min[1]);
-        var scale = 18000 * Math.pow(x, -0.6);
-        return scale === Infinity ? 80000 : scale;
+    public static getZoomScale(dataModel: DataModel, path, width: number, height: number): number {
+        var boundMax = [0, 0];
+        var boundMin = [10000, 10000];
+        var len = dataModel.data.length;
+        for (var i = 0; i < len; ++i) {
+            var bound = path.bounds(dataModel.data[i].mapData);
+            boundMax[0] = Math.max(boundMax[0], bound[1][0]);
+            boundMax[1] = Math.max(boundMax[1], bound[1][1]);
+            boundMin[0] = Math.min(boundMin[0], bound[0][0]);
+            boundMin[1] = Math.min(boundMin[1], bound[0][1]);
+        }
+        var shapeWidth = boundMax[0] - boundMin[0];
+        var shapeHeight = boundMax[1] - boundMin[1];
+        var scale = Math.min(width / shapeWidth, (height / shapeHeight) * 0.8); // on diminue unpeu le scale de la hauteur pour pas que ca dépasse
+        return scale < 1 ? 1 : scale;
     }
 
-    //TODO: docu
+    /**
+     * Permet de récupérer une valeur d'objet (options) dans les métadonnées
+     * @param objects metadata.objects
+     * @param objectName nom de l'objet
+     * @param propertyName nom de la propriété
+     * @param defaultValue valeur par défault
+     */
     public static getValue<T>(objects: DataViewObjects, objectName: string, propertyName: string, defaultValue: T): T {
         if (objects) {
             let object = objects[objectName];

@@ -88,7 +88,6 @@ export class VisualSettings {
 
 
     //color scale setting
-    console.log(this.color.minColor.solid.color);
     this.scale.rangeLevel = util.getValue(metadata.objects,"couleur","colorRange",6); //donne le nombre de "catégorie" de couleur pour l'échelle
     this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
     this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 

@@ -45,7 +45,7 @@ export class Visual implements IVisual {
         //parse des settings
         this.settings.parse(options.dataViews[0]);
         //parse du datamodel     
-        this.dataModel = model.parseDataModel(options.dataViews[0],this.settings,this.host);
+        this.dataModel = model.parseDataModel(options.dataViews[0], this.settings, this.host);
         //Attribution de la taille a la div principal
         var width = options.viewport.width;
         var height = options.viewport.height;
@@ -54,10 +54,10 @@ export class Visual implements IVisual {
         this.svg.attr('height', height);
 
         //dessin de l'échelle de couleur
-        this.colorScale.draw(this.dataModel,this.settings,this.selectionManager,width*0.15,height*0.1);
+        this.colorScale.draw(this.dataModel, this.settings, this.selectionManager, width * 0.15, height * 0.1);
         //dessin de la carte
-        this.map.draw(this.dataModel,this.settings,this.selectionManager,width/2,height/2);
-        
+        this.map.draw(this.dataModel, this.settings, this.selectionManager, width / 2, height / 2);
+
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
@@ -69,13 +69,13 @@ export class Visual implements IVisual {
                 objectEnumeration.push({
                     objectName: objectName,
                     displayName: objectName,
-                    properties:{
-                        minColor:{
+                    properties: {
+                        minColor: {
                             solid: {
                                 color: this.settings.color.minColor.solid.color
                             }
                         },
-                        maxColor:{
+                        maxColor: {
                             solid: {
                                 color: this.settings.color.maxColor.solid.color
                             }

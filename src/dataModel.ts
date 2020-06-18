@@ -19,8 +19,6 @@ export interface DataModel {
     data: DataPoint[]; //tableau de datapoint
     minValue: number; //valeur minimal du dataview
     maxValue: number; //valeur maximal du dataview
-    centroid: [number, number];
-    scale: number;
 }
 
 export function parseDataModel(dataView: DataView, settings: VisualSettings, host: IVisualHost): DataModel {
@@ -42,9 +40,6 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         .domain([0, maxValue])
         .range(d3.range(settings.scale.rangeLevel));
 
-    //on va chercher les bordure min et max pour trouver le zoom adéquat et le centre de notre map
-    var maxBound: [number, number] = [-180, -90];
-    var minBound: [number, number] = [180, 90];
 
     //on boucle sur les formes, pour récupérer les informations
     for (var i = 0; i < geo.features.length; ++i) {
@@ -60,11 +55,6 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         //récupération du tracer de la forme
         var feat = geo.features[i];
 
-        //on cherche si on a trouvé une nouvelles bordure
-        var bound: [[number, number], [number, number]] = d3.geoBounds(feat);
-        maxBound = util.getMaxCoord(maxBound, bound[1]);
-        minBound = util.getMinCoord(minBound, bound[0]);
-
         //assignation de la valeur
         var value = values[index];
 
@@ -78,12 +68,7 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         dps.push(dp);
     }
 
-    //a partir des bordures précedemment calculé, on définir le centroid
-    var centroid: [number, number] = util.getCentroid(maxBound, minBound);
-    //calcul du zoom en fonction des bordures
-    var scale = util.getZoomScale(maxBound, minBound);
-
     //resultat
-    var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue, centroid: centroid, scale: scale };
+    var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue };
     return model;
 }
