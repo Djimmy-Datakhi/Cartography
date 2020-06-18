@@ -19,6 +19,7 @@ export class Scale {
         this.div.selectAll('#legendAxis').remove(); //suppression de l'axe de l'échelle de couleur
     }
 
+    
     public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number){
         //supprime le dessin précédent
         this.erase();

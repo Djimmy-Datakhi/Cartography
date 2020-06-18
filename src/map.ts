@@ -20,7 +20,7 @@ export class Map {
         this.div.selectAll('.path').remove();
     }
 
-    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number,viewPortW:number,viewPortH){
+    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number){
         var _this = this;
 
         //supprimer le dessin précédent
@@ -55,18 +55,14 @@ export class Map {
                 });
                 mouseEvent.preventDefault();
             });
-        
-        var scale = settings.mapBackground.drillLevel * 2;
-        scale = scale == 0 ? 1 : scale;
-        var translate = util.getTranslation(dataModel,this.path,x,y);
-        console.log(translate[0]+" "+translate[1]);
-        //console.log(util.getZoomScale(dataModel,this.path,viewPortW,viewPortH));
-        
-        //this.div.transition().duration(750).attr("transform","scale("+scale+")");
 
+        //animation
+        var scale = util.getZoomScale(dataModel,this.path,x,y*2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
+        var translate = util.getTranslation(dataModel,this.path,x,y,scale);
+        
         this.div
         .transition().duration(750)
-        .attr("transform","translate("+(-(scale-1)*x +translate[0]*scale)+","+(-(scale-1)*y + translate[1]*scale)+")scale("+scale+")")
+        .attr("transform","translate("+translate[0]+","+translate[1]+")scale("+scale+")")
         
        // .transition().duration(750).attr("transform","scale("+scale+")");
 

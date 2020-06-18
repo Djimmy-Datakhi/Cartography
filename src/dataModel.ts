@@ -69,6 +69,6 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
     }
 
     //resultat
-    var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue};
+    var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue };
     return model;
 }
