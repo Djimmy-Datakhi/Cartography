@@ -8,6 +8,7 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import {DataModel} from "./dataModel"
 import { VisualSettings } from "./settings";
 import { util } from "./utility";
+import { ITooltipServiceWrapper, TooltipEventArgs } from "./toolTip";
 
 export class Map {
     private div:Selection<SVGElement>;
@@ -22,7 +23,14 @@ export class Map {
         this.div.selectAll('.path').remove();
     }
 
-    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number){
+    private static getTooltipData(value: any) {
+        return [{
+            displayName: value.name,
+            value: value.value.toString()
+        }];
+    }
+
+    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number,toolTip:ITooltipServiceWrapper){
         var _this = this;
 
         //supprimer le dessin précédent
@@ -106,7 +114,10 @@ export class Map {
         .transition().duration(750)
         .attr("transform","translate("+translate[0]+","+translate[1]+")scale("+scale+")")
         
-       // .transition().duration(750).attr("transform","scale("+scale+")");
-
+       //tooltip
+        toolTip.addTooltip(this.div.selectAll('path'),
+            (tooltipEvent: TooltipEventArgs<number>) => Map.getTooltipData(tooltipEvent.data),
+            (tooltipEvent: TooltipEventArgs<number>) => null);
+            
     }
 }
