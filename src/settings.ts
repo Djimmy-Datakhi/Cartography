@@ -63,15 +63,25 @@ class ColorSetting{
   }
 }
 
+class TooltipSetting{
+  public show:boolean;
+
+  constructor(){
+    this.show = true;
+  }
+}
+
 export class VisualSettings {
   public mapBackground: MapBackgroundSetting;
   public color: ColorSetting;
   public scale: ScaleSetting;
+  public tooltip:TooltipSetting;
 
   constructor() {
     this.mapBackground= new MapBackgroundSetting;
     this.color = new ColorSetting;
     this.scale= new ScaleSetting;
+    this.tooltip = new TooltipSetting;
   }
 
   public parse(dataview: DataView){
@@ -86,12 +96,14 @@ export class VisualSettings {
     this.color.minColor = util.getValue(metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
     this.color.maxColor = util.getValue(metadata.objects,"couleur","maxColor",{solid:{color:"#FF0000"}});
 
-
     //color scale setting
     this.scale.rangeLevel = util.getValue(metadata.objects,"couleur","colorRange",6); //donne le nombre de "catégorie" de couleur pour l'échelle
     this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
     this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 
     this.scale.colors.generateScale(); //on génère l'échelle de couleur
+
+    //tooltip setting
+    this.tooltip.show = util.getValue(metadata.objects,"tooltip","show",true);
   }
 }
 

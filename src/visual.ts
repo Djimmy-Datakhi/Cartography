@@ -21,6 +21,7 @@ import * as model from "./dataModel"
 import { Map } from "./map";
 import { Scale } from "./scale"
 import { ITooltipServiceWrapper, createTooltipServiceWrapper } from "./toolTip";
+import { selection } from "d3";
 
 export class Visual implements IVisual {
     private svg: Selection<SVGElement>; //div principale
@@ -60,7 +61,7 @@ export class Visual implements IVisual {
         //dessin de l'échelle de couleur
         this.colorScale.draw(this.dataModel, this.settings, this.selectionManager, width * 0.15, height * 0.1);
         //dessin de la carte
-        this.map.draw(this.dataModel, this.settings, this.selectionManager, width / 2, height / 2,this.tooltipServiceWrapper);
+        this.map.draw(this.dataModel, this.settings, this.selectionManager, width / 2, height / 2, this.tooltipServiceWrapper);
 
     }
 
@@ -87,7 +88,17 @@ export class Visual implements IVisual {
                         colorRange: this.settings.scale.rangeLevel
                     },
                     selector: null
-                })
+                });
+                break;
+            case 'tooltip':
+                objectEnumeration.push({
+                    objectName: objectName,
+                    displayName: objectName,
+                    properties: {
+                        show: this.settings.tooltip.show
+                    },
+                    selector: null
+                });
                 break;
         }
         return objectEnumeration;
