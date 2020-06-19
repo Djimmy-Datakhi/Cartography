@@ -47,33 +47,40 @@ export class Map {
             .attr('id', function (d) { return d.name }) //nom de la forme
             .attr('fill', function (d) { return d.color }) //couleur
             .style('opacity', function(d) {
+                //si une forme est sélectionner
                 if(selectionManager.hasSelection()){
-                    console.log(_this.previousSelected);
-                    console.log(d.selectionId);
-
+                    //on met l'opacité à 1 pour la form selectionner
                     if(JSON.stringify(_this.previousSelected) === JSON.stringify(d.selectionId)){ //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
                         return "1";
                     }
+                    //sinon en transparent
                     else{
                         return "0.5";
                     }
                 }
+                //si pas de région sélectionner
                 else{
+                    //si il y a un highlight
                     if(d.highlight != null){
+                        //cette forme n'est pas sélectionner
                         if(d.highlight === 0){
                             return "0.5";
                         }
+                        //elle est sélectionner
                         return "1";
                     }
+                    //si il n'y en a pas de highlight
                     return "1";    
                 }
             })
             .on('click', function (d) { //gestion du clic droit
+                //si on clic sur la forme déja sélectionner, on la désélectionne
                 if(selectionManager.hasSelection() && _this.previousSelected === d.selectionId){
                     _this.previousSelected = null
                     d3.selectAll('path').style('opacity',1)
                     selectionManager.clear();
                 }
+                //sinon on sélectionne la forme cliquer
                 else{
                     _this.previousSelected = d.selectionId;
                     d3.selectAll('path').style('opacity',0.5)

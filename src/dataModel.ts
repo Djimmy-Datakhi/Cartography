@@ -62,11 +62,14 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         //assignation de la valeur
         var value = values[index];
 
-        //recuperation du highlight, si il y a, sinon null
+        
         var highVal = null;
+        //si il y a un highlight
         if(hasHighlight){
+            //et que cette forme est highlighté, on récupère sa valeur, sinon on la met a 0
             highVal = highlight[index] ? highlight[index] : 0;
         }
+        //si il n'y a pas de highlight, on garde la valeur null.
 
         //création de la couleur
         var color = settings.scale.colors.getColor(quantile(value)); //on utilise la fonction d'échelle créer précedemment
