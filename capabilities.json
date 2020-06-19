@@ -72,6 +72,18 @@
                     }
                 }
             }
+        },
+        "tooltip": {
+            "displayName": "info bulle",
+            "description" : "affichage de l'info bulle",
+            "properties": {
+                "show":{
+                    "displayName" : "afficher",
+                    "type": {
+                        "bool" : true
+                    }
+                }
+            }
         }
     }
 }
