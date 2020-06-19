@@ -13,6 +13,7 @@ export interface DataPoint {
     color: string; //couleur de la forme
     value: number; //valeur de la forme
     selectionId: ISelectionId; //Id permettant le drilldown
+    highlight: number; //valeur highlight, null si aucune valeur n'est highlight, 0 sinon
 }
 
 export interface DataModel {
@@ -24,6 +25,7 @@ export interface DataModel {
 export function parseDataModel(dataView: DataView, settings: VisualSettings, host: IVisualHost): DataModel {
     var dps: DataPoint[] = [];
     var values: number[] = dataView.categorical.values[0].values as number[];
+    var highlight:number[] = dataView.categorical.values[0].highlights as number[];
     var categories: string[] = dataView.categorical.categories[0].values as string[];
     var categoriesSimple = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
 
@@ -40,6 +42,8 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         .domain([0, maxValue])
         .range(d3.range(settings.scale.rangeLevel));
 
+    //booleen pour savoir si il y a une valeur highlighté
+    var hasHighlight:boolean = highlight ? true : false;
 
     //on boucle sur les formes, pour récupérer les informations
     for (var i = 0; i < geo.features.length; ++i) {
@@ -58,13 +62,19 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         //assignation de la valeur
         var value = values[index];
 
+        //recuperation du highlight, si il y a, sinon null
+        var highVal = null;
+        if(hasHighlight){
+            highVal = highlight[index] ? highlight[index] : 0;
+        }
+
         //création de la couleur
         var color = settings.scale.colors.getColor(quantile(value)); //on utilise la fonction d'échelle créer précedemment
 
         //création de l'id de selection de la forme
         var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index).createSelectionId()
 
-        var dp: DataPoint = { name: name, mapData: feat, value: value, color: color, selectionId: selectionId };
+        var dp: DataPoint = { name: name, mapData: feat, value: value, color: color, selectionId: selectionId, highlight: highVal };
         dps.push(dp);
     }
 
