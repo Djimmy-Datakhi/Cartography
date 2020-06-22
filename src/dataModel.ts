@@ -27,7 +27,14 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
     var values: number[] = dataView.categorical.values[0].values as number[];
     var highlight:number[] = dataView.categorical.values[0].highlights as number[];
     var categories: string[] = dataView.categorical.categories[0].values as string[];
-    var categoriesSimple = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
+
+    //détermines si les valeurs sont des noms ou des codes
+    var isCode:boolean = util.isCode(categories[0]);
+    console.log(isCode);
+    if(!isCode){     //si ce n'est pas des codes, on simplifie les noms
+        var categoriesSimple:string[] = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
+
+    }
 
     //valeur extréme du dataview
     var minValue: number = dataView.categorical.values[0].minLocal as number;
@@ -51,10 +58,17 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         var name = geo.features[i].properties.nom;
 
         //récupération de l'index de catégories et values correspondant à la forme traité
-        var nameSimple = util.simplifyString(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
-        var index = util.valueMatcher(nameSimple, categoriesSimple);
+        var index:number;
+        if(isCode){ 
+            var code = geo.features[i].properties.code;
+            index = util.valueMatcher(code,categories);
+        }
+        else{
+            var nameSimple = util.simplifyString(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
+            index = util.valueMatcher(nameSimple, categoriesSimple);
+        }
         if (index == -1) //Si l'index retourner est 0, on passe a l'ittération suivante
-            continue
+                continue
 
         //récupération du tracer de la forme
         var feat = geo.features[i];

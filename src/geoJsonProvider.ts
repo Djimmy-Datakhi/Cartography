@@ -1,6 +1,7 @@
 import departements from "../assets/geoJson/departements.json";
 import regions from "../assets/geoJson/regions.json";
 import arrondissements from "../assets/geoJson/arrondissements.json";
+import communes from "../assets/geoJson/communes.json";
 
 /**
  * Permet de récupérer les fichiers geoJson.
@@ -18,6 +19,9 @@ export function getJson(name: string) {
             break;
         case 'arrondissements':
             result = arrondissements;
+            break;
+        case 'communes':
+            result = communes;
             break;
     }
     return result;

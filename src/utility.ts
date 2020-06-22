@@ -4,6 +4,10 @@ import { DataModel } from "./dataModel";
 
 
 export class util {
+    public static isCode(value:string){
+        return !isNaN(+value);//RegExp(/[0-9]*/g).test(value);
+    }
+
     /**
      * Permet de retouver l'index de la categories et values qui correspond a la forme actuel
      * Elle réalise un match entre le nom de la forme et le nom de la catégorie, lorsqu'il y a un match, il renvoie l'index
@@ -52,8 +56,8 @@ export class util {
                     result = metadata[i].index;
             }
         }
-        if (result > 2) //si l'index est trop grand (ne devrait pas arriver sur une hierarchie de 3 niveau) on le remet a 2
-            return 2;
+        if (result > 3) //si l'index est trop grand (ne devrait pas arriver sur une hierarchie de 4 niveau) on le remet a 3
+            return 3;
         return result;
     }
 
@@ -69,6 +73,8 @@ export class util {
             return 'departements';
         if (drillLevel === 2)
             return 'arrondissements';
+        if (drillLevel === 3)
+            return 'communes';
     }
 
     /**
@@ -107,8 +113,10 @@ export class util {
         var len = dataModel.data.length;
         for (var i = 0; i < len; ++i) {
             var center = path.centroid(dataModel.data[i].mapData);
-            xtot = xtot + center[0];
-            ytot = ytot + center[1];
+            if(center[0] && center[1]){
+                xtot = xtot + center[0];
+                ytot = ytot + center[1];
+            }
         }
         var translate: [number, number] = [x - (xtot / len), y - (ytot / len)]; // vecteur de translation entre le centroid de la forme et celle de la div
         translate = [(-(scale - 1) * x + translate[0] * scale), (-(scale - 1) * y + translate[1] * scale)]; //recentrage en prenant en compte le scale
