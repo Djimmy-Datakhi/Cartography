@@ -30,6 +30,25 @@ export class Map {
         }];
     }
 
+    private selected(shape: SVGPathElement,scale:number) {
+        d3.select(shape)
+            .style('opacity', 1)
+            .style('stroke-width', 1/scale)
+            .style('stroke', 'black');
+    }
+
+    private unselected(shape: SVGPathElement) {
+        d3.select(shape)
+            .style('opacity', 0.5)
+            .style('stroke-width', 0);
+    }
+
+    private neutral(shape: SVGElement) {
+        d3.select(shape)
+            .style('opacity', 1)
+            .style('stroke-width', 0);
+    }
+
     public draw(dataModel: DataModel, settings: VisualSettings, selectionManager: ISelectionManager, x: number, y: number, toolTip: ITooltipServiceWrapper) {
         var _this = this;
 
@@ -44,6 +63,10 @@ export class Map {
 
         this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection        
 
+        //on calcule le zoom et la translation a appliquer
+        var scale = util.getZoomScale(dataModel, this.path, x, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
+        var translate = util.getTranslation(dataModel, this.path, x, y, scale);
+
         //dessin
         this.div //on dessine les formes une par une
             .selectAll('path')
@@ -54,16 +77,16 @@ export class Map {
             .attr('d', function (d) { return _this.path(d.mapData) }) //dessin de la forme
             .attr('id', function (d) { return d.name }) //nom de la forme
             .attr('fill', function (d) { return d.color }) //couleur
-            .style('opacity', function (d) {
+            .each(function (d) {
                 //si une forme est sélectionner
+                console.log("hasSelection : " + selectionManager.hasSelection());
                 if (selectionManager.hasSelection()) {
-                    //on met l'opacité à 1 pour la form selectionner
                     if (JSON.stringify(_this.previousSelected) === JSON.stringify(d.selectionId)) { //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
-                        return "1";
+                        _this.selected(this as SVGPathElement,scale);
                     }
                     //sinon en transparent
                     else {
-                        return "0.5";
+                        _this.unselected(this as SVGPathElement);
                     }
                 }
                 //si pas de région sélectionner
@@ -72,30 +95,37 @@ export class Map {
                     if (d.highlight != null) {
                         //cette forme n'est pas sélectionner
                         if (d.highlight === 0) {
-                            return "0.5";
+                            _this.unselected(this as SVGPathElement);
                         }
-                        //elle est sélectionner
-                        return "1";
+                        else {
+                            //elle est sélectionner
+                            _this.selected(this as SVGPathElement,scale);
+                        }
                     }
-                    //si il n'y en a pas de highlight
-                    return "1";
+                    else {
+                        //si il n'y en a pas de highlight
+                        _this.neutral(this as SVGPathElement);
+                    }
                 }
             })
             .on('click', function (d) { //gestion du clic droit
                 //si on clic sur la forme déja sélectionner, on la désélectionne
-                if (selectionManager.hasSelection() && _this.previousSelected === d.selectionId) {
+                console.log(_this.previousSelected)
+                console.log(d.selectionId)
+                if (selectionManager.hasSelection() && JSON.stringify(_this.previousSelected) === JSON.stringify(d.selectionId)) {
                     _this.previousSelected = null
-                    d3.selectAll('path').style('opacity', 1)
+                    d3.selectAll('path').each(function () { _this.neutral(this as SVGPathElement); })
                     selectionManager.clear();
+                    console.log("deselection")
                 }
                 //sinon on sélectionne la forme cliquer
                 else {
                     _this.previousSelected = d.selectionId;
-                    d3.selectAll('path').style('opacity', 0.5)
-                    d3.select(this).style('opacity', 1);
+                    d3.selectAll('path').each(function () { _this.unselected(this as SVGPathElement) })
+                    d3.select(this).each(function () { _this.selected(this as SVGPathElement,scale)})
                     selectionManager.select(d.selectionId);
-                }
-
+                    console.log("selection")
+                }             
             })
             .on('contextmenu', function (d) { //gestion du clic gauche
                 const mouseEvent: MouseEvent = d3.event as MouseEvent;
@@ -104,12 +134,12 @@ export class Map {
                     y: mouseEvent.clientY
                 });
                 mouseEvent.preventDefault();
+            })
+            .each(function (d) {
+
             });
 
         //animation
-        var scale = util.getZoomScale(dataModel, this.path, x, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
-        var translate = util.getTranslation(dataModel, this.path, x, y, scale);
-
         this.div
             .transition().duration(750)
             .attr("transform", "translate(" + translate[0] + "," + translate[1] + ")scale(" + scale + ")")
