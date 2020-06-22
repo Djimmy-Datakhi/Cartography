@@ -30,7 +30,6 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
 
     //détermines si les valeurs sont des noms ou des codes
     var isCode:boolean = util.isCode(categories[0]);
-    console.log(isCode);
     if(!isCode){     //si ce n'est pas des codes, on simplifie les noms
         var categoriesSimple:string[] = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
 
