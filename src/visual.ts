@@ -91,7 +91,7 @@ export class Visual implements IVisual {
                         colorRange: {
                             numberRange:{
                                 min: 3,
-                                max: 20
+                                max: 30
                             }
                         }
                     },
