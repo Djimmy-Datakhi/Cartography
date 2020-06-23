@@ -57,7 +57,7 @@ export class Map {
 
         //creation de la fonction de traçage
         var projection = d3.geoConicConformal()
-            .center([2.454071, 46.279229]) //centre de la france
+            .center([2.454071, 47.279229]) //centre de la france
             .scale(2600) //zoom
             .translate([x, y]) //on place la carte au centre de la div
 

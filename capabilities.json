@@ -114,6 +114,65 @@
                     }
                 }
             }
+        },
+        "map":{
+            "displayName": "Découpage",
+            "description": "Choix du découpage de la carte",
+            "properties":{
+                "level1": {
+                    "displayName": "1er Niveau",
+                    "type": {
+                        "enumeration":[
+                            {
+                                "value": "regions",
+                                "displayName": "régions"
+                            },
+                            {
+                                "value": "departements",
+                                "displayName": "département"
+                            },
+                            {
+                                "value": "arrondissements",
+                                "displayName": "arrondissements"
+                            }
+                        ]
+                    }
+                },
+                "level2": {
+                    "displayName": "2eme Niveau",
+                    "type": {
+                        "enumeration":[
+                            {
+                                "value": "departements",
+                                "displayName": "département"
+                            },
+                            {
+                                "value": "arrondissements",
+                                "displayName": "arrondissements"
+                            },
+                            {
+                                "value": "communes",
+                                "displayName": "communes"
+                            }
+                        ]
+                    }
+                },
+                "level3": {
+                    "displayName": "3eme Niveau",
+                    "type": {
+                        "enumeration":[
+                            {
+                                "value": "arrondissements",
+                                "displayName": "arrondissements"
+                            },
+                            {
+                                "value": "communes",
+                                "displayName": "communes"
+                            }
+                        ]
+                    }
+                }
+            }
         }
     }
 }

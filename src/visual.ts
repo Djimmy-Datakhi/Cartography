@@ -147,6 +147,18 @@ export class Visual implements IVisual {
                     selector: null
                 });
                 break;
+            case 'map':
+                objectEnumeration.push({
+                    objectName: objectName,
+                    displayName: objectName,
+                    properties: {
+                        level1: this.settings.mapBackground.mapSelection[0],
+                        level2: this.settings.mapBackground.mapSelection[1],
+                        level3: this.settings.mapBackground.mapSelection[2]
+                    },
+                    selector:null
+                })
+                break;
         }
         return objectEnumeration;
     }
