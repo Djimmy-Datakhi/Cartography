@@ -32,14 +32,15 @@ import Fill = powerbi.Fill;
 import { ColorScale } from "./colorScale";
 import { util } from "./utility";
 
-
 class MapBackgroundSetting {
   public selectedMap: string;
   public drillLevel: number;
+  public mapSelection: string[];
 
   constructor() {
     this.selectedMap = "regions";
     this.drillLevel = 0;
+    this.mapSelection = ["regions","departements","arrondissements","communes"];
   }
 }
 
@@ -98,7 +99,16 @@ export class VisualSettings {
     var metadata = dataview.metadata;
     //map background setting
     this.mapBackground.drillLevel = util.getDrillLevel(metadata.columns); //donne a quel niveau de drilldown on se trouve (commence a 0)
-    this.mapBackground.selectedMap = util.getMapName(this.mapBackground.drillLevel); //donne la carte a utiliser en fonction du niveau de drilldown
+    this.mapBackground.mapSelection = []; //on met les découpages voulues par l'utilisateurs
+    var level1 = util.getValue(metadata.objects,"map","level1","regions");
+    var level2 = util.getValue(metadata.objects,"map","level2","departements");
+    var level3 = util.getValue(metadata.objects,"map","level3","arrondissements");
+    this.mapBackground.mapSelection.push(level1);
+    this.mapBackground.mapSelection.push(level2);
+    this.mapBackground.mapSelection.push(level3);
+    this.mapBackground.mapSelection.push("communes");
+    //on sélectionne la map a utiliser en fonction du niveau de drill et du découpage sélectionné.
+    this.mapBackground.selectedMap = this.mapBackground.mapSelection[this.mapBackground.drillLevel]; //donne la carte a utiliser en fonction du niveau de drilldown
 
     //color setting
     this.color.minColor = util.getValue(metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
