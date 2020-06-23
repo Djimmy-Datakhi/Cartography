@@ -4,8 +4,13 @@ import { DataModel } from "./dataModel";
 
 
 export class util {
+
+    /**
+     * Permet de tester si un string est un code (composer entiérement de numero)
+     * @param value valeur a tester
+     */
     public static isCode(value:string){
-        return !isNaN(+value);//RegExp(/[0-9]*/g).test(value);
+        return !isNaN(+value);
     }
 
     /**

@@ -68,7 +68,7 @@
                 "colorRange":{
                     "displayName": "Niveau de couleur",
                     "type": {
-                        "numeric": true
+                        "integer": true
                     }
                 }
             }
@@ -81,6 +81,36 @@
                     "displayName" : "afficher",
                     "type": {
                         "bool" : true
+                    }
+                }
+            }
+        },
+        "scale":{
+            "displayName": "échelle de couleur",
+            "description": "Mise en forme de l'échelle de couleur",
+            "properties": {
+                "height":{
+                    "displayName": "hauteur",
+                    "type": {
+                        "integer" : true
+                    }
+                },
+                "width":{
+                    "displayName": "largeur",
+                    "type": {
+                        "integer" : true
+                    }
+                },
+                "xpos":{
+                    "displayName": "X",
+                    "type": {
+                        "integer" : true
+                    }
+                },
+                "ypos":{
+                    "displayName": "Y",
+                    "type": {
+                        "integer" : true
                     }
                 }
             }

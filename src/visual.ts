@@ -59,7 +59,7 @@ export class Visual implements IVisual {
         this.svg.attr('height', height);
 
         //dessin de l'échelle de couleur
-        this.colorScale.draw(this.dataModel, this.settings, this.selectionManager, width * 0.15, height * 0.1);
+        this.colorScale.draw(this.dataModel, this.settings, this.selectionManager);
         //dessin de la carte
         this.map.draw(this.dataModel, this.settings, this.selectionManager, width / 2, height / 2, this.tooltipServiceWrapper);
 
@@ -87,6 +87,14 @@ export class Visual implements IVisual {
                         },
                         colorRange: this.settings.scale.rangeLevel
                     },
+                    validValues:{
+                        colorRange: {
+                            numberRange:{
+                                min: 3,
+                                max: 20
+                            }
+                        }
+                    },
                     selector: null
                 });
                 break;
@@ -100,29 +108,48 @@ export class Visual implements IVisual {
                     selector: null
                 });
                 break;
+            case 'scale':
+                objectEnumeration.push({
+                    objectName: objectName,
+                    displayName: objectName,
+                    properties: {
+                        height: this.settings.scale.height,
+                        width: this.settings.scale.width,
+                        xpos: this.settings.scale.xpos,
+                        ypos: this.settings.scale.ypos
+                    },
+                    validValues:{
+                        height: {
+                            numberRange:{
+                                min: 50,
+                                max: 500
+                            }
+                        },
+                        width: {
+                            numberRange:{
+                                min: 10,
+                                max: 100
+                            }
+                        },
+                        xpos: {
+                            numberRange:{
+                                min: 0,
+                                max: 5000
+                            }
+                        },
+                        ypos: {
+                            numberRange:{
+                                min: 0,
+                                max: 5000
+                            }
+                        }
+                    },
+                    selector: null
+                });
+                break;
         }
         return objectEnumeration;
     }
-
-    /*
-        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
-            var objectName = options.objectName;
-            var objectEnumeration: VisualObjectInstance[] = [];
-    
-            switch (objectName) {
-                case 'map':
-                    objectEnumeration.push({
-                        objectName: objectName,
-                        properties: {
-                            mapBackground: this.settings.mapBackground.selectedMap //choix du fond de carte, est utiliser pour l'appel de geoJsonProvider
-                        },
-                        selector: null
-                    })
-                    break;
-            }
-            return objectEnumeration;
-        }
-     */
 
     public destroy(): void { }
 }
