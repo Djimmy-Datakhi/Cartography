@@ -46,10 +46,18 @@ class MapBackgroundSetting {
 class ScaleSetting {
   public rangeLevel: number;
   public colors: ColorScale ;
+  public height: number;
+  public width: number;
+  public xpos: number;
+  public ypos: number;
 
   constructor() {
     this.rangeLevel = 6;
     this.colors = new ColorScale;
+    this.height = 250;
+    this.width = 20;
+    this.xpos = 100;
+    this.ypos = 50;
   }
 }
 
@@ -101,6 +109,10 @@ export class VisualSettings {
     this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
     this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 
     this.scale.colors.generateScale(); //on génère l'échelle de couleur
+    this.scale.height = util.getValue(metadata.objects,"scale","height",250);
+    this.scale.width = util.getValue(metadata.objects,"scale","width",20);
+    this.scale.xpos = util.getValue(metadata.objects,"scale","xpos",100);
+    this.scale.ypos = util.getValue(metadata.objects,"scale","ypos",50);
 
     //tooltip setting
     this.tooltip.show = util.getValue(metadata.objects,"tooltip","show",true);

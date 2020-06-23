@@ -20,9 +20,14 @@ export class Scale {
     }
 
     
-    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager,x:number,y:number){
+    public draw(dataModel: DataModel,settings: VisualSettings,selectionManager: ISelectionManager){
         //supprime le dessin précédent
         this.erase();
+
+        var elementHeight = settings.scale.height/settings.scale.rangeLevel;
+        var width = settings.scale.width;
+        var x = settings.scale.xpos;
+        var y = settings.scale.ypos;
 
         //échelle de couleur
         this.div.append('g') //on va supperposer les carréer de couleur pour créer notre échelle de couleur
@@ -33,15 +38,15 @@ export class Scale {
             .enter()
             .append('rect')
             .attr('x', '0px')
-            .attr('y', function (d) { return d * 40 + 'px' })
-            .attr('height', '40px')
-            .attr('width', '40px')
+            .attr('y', function (d) { return d * elementHeight + 'px' })
+            .attr('height', elementHeight + 'px')
+            .attr('width', width + 'px')
             .attr('fill', function (d) { return settings.scale.colors.getColor(d); })
 
         //axe gradué
         var legendScale = d3.scaleLinear() //échelle linéaire pour nous permettre d'afficher les valeurs
             .domain([0, dataModel.maxValue])
-            .range([0, settings.scale.rangeLevel * 40]);
+            .range([0, settings.scale.rangeLevel * elementHeight]);
         x = x - 10; //Pour décaler l'axe pour qu'il ne soit pas collé à l'échelle
 
         this.div.append('g')
