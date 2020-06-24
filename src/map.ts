@@ -117,16 +117,25 @@ export class Map {
                 }
                 //sinon on sélectionne la forme cliquer
                 else {
-                    _this.previousSelected.push(d.selectionId);
-                    d3.selectAll('path').each(function (d:DataPoint){ 
-                        if(d && util.contain(d.selectionId,_this.previousSelected)){
-                            _this.selected(this as SVGPathElement,scale)
-                        }
-                        else{
-                            _this.unselected(this as SVGPathElement)
-                        }
-                    })
+                    if(d3.event.ctrlKey){
+                        _this.previousSelected.push(d.selectionId);
+                        d3.selectAll('path').each(function (d:DataPoint){ 
+                            if(d && util.contain(d.selectionId,_this.previousSelected)){
+                                _this.selected(this as SVGPathElement,scale)
+                            }
+                            else{
+                                _this.unselected(this as SVGPathElement)
+                            }
+                        });
                     selectionManager.select(d.selectionId,true);
+                    }
+                    else{
+                        _this.previousSelected = [d.selectionId]
+                        d3.selectAll('path').each(function (d){_this.unselected(this as SVGPathElement)})
+                        _this.selected(this as SVGPathElement,scale);
+                        selectionManager.select(d.selectionId);
+                    }
+                   
                 }             
             })
             .on('contextmenu', function (d) { //gestion du clic gauche
