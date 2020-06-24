@@ -5,7 +5,7 @@ import ISelectionId = powerbi.extensibility.ISelectionId;
 import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
-import { DataModel } from "./dataModel"
+import { DataModel, DataPoint } from "./dataModel"
 import { VisualSettings } from "./settings";
 import { util } from "./utility";
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./toolTip";
@@ -13,10 +13,11 @@ import { ITooltipServiceWrapper, TooltipEventArgs } from "./toolTip";
 export class Map {
     private div: Selection<SVGElement>;
     private path;
-    private previousSelected: ISelectionId;
+    private previousSelected: ISelectionId[];
 
     constructor(svg: Selection<SVGElement>) {
         this.div = svg.append('g');
+        this.previousSelected = [];
     }
 
     public erase() {
@@ -79,9 +80,8 @@ export class Map {
             .attr('fill', function (d) { return d.color }) //couleur
             .each(function (d) {
                 //si une forme est sélectionner
-                console.log("hasSelection : " + selectionManager.hasSelection());
                 if (selectionManager.hasSelection()) {
-                    if (JSON.stringify(_this.previousSelected) === JSON.stringify(d.selectionId)) { //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
+                    if (d && util.contain(d.selectionId,_this.previousSelected)) { //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
                         _this.selected(this as SVGPathElement,scale);
                     }
                     //sinon en transparent
@@ -110,21 +110,23 @@ export class Map {
             })
             .on('click', function (d) { //gestion du clic droit
                 //si on clic sur la forme déja sélectionner, on la désélectionne
-                console.log(_this.previousSelected)
-                console.log(d.selectionId)
-                if (selectionManager.hasSelection() && JSON.stringify(_this.previousSelected) === JSON.stringify(d.selectionId)) {
-                    _this.previousSelected = null
+                if (selectionManager.hasSelection() && util.contain(d.selectionId,_this.previousSelected)) {
+                    _this.previousSelected = []
                     d3.selectAll('path').each(function () { _this.neutral(this as SVGPathElement); })
                     selectionManager.clear();
-                    console.log("deselection")
                 }
                 //sinon on sélectionne la forme cliquer
                 else {
-                    _this.previousSelected = d.selectionId;
-                    d3.selectAll('path').each(function () { _this.unselected(this as SVGPathElement) })
-                    d3.select(this).each(function () { _this.selected(this as SVGPathElement,scale)})
-                    selectionManager.select(d.selectionId);
-                    console.log("selection")
+                    _this.previousSelected.push(d.selectionId);
+                    d3.selectAll('path').each(function (d:DataPoint){ 
+                        if(d && util.contain(d.selectionId,_this.previousSelected)){
+                            _this.selected(this as SVGPathElement,scale)
+                        }
+                        else{
+                            _this.unselected(this as SVGPathElement)
+                        }
+                    })
+                    selectionManager.select(d.selectionId,true);
                 }             
             })
             .on('contextmenu', function (d) { //gestion du clic gauche

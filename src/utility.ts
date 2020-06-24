@@ -1,5 +1,6 @@
 import powerbi from "powerbi-visuals-api";
 import DataViewObjects = powerbi.DataViewObjects;
+import ISelectionId = powerbi.extensibility.ISelectionId;
 import { DataModel } from "./dataModel";
 
 
@@ -171,5 +172,13 @@ export class util {
             }
         }
         return defaultValue;
+    }
+
+    public static contain(value:ISelectionId,array:ISelectionId[]): boolean{
+        for(var i = 0;i<array.length;++i){
+            if(JSON.stringify(value) === JSON.stringify(array[i]))
+                return true
+        }
+        return false;
     }
 }
