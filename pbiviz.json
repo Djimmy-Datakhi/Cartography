@@ -1,1 +1,25 @@
-{"visual":{"name":"cartography","displayName":"cartography","guid":"cartography6439711748644562B5895D8406A5421D","visualClassName":"Visual","version":"1.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"2.6.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[]}
+{
+    "visual": {
+        "name": "FranceChoropleth",
+        "displayName": "France Drilldown Choropleth",
+        "guid": "cartography6439711748644562B5895D8406A5421D",
+        "visualClassName": "Visual",
+        "version": "1.0.0",
+        "description": "Map of france with 4 differents built-in geographic divisions (Régions, Département, Arrondissement, Communes). user have to select which division they want to display for each drill level.",
+        "supportUrl": "",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "2.6.0",
+    "author": {
+        "name": "Denis Jimmy",
+        "email": "jimmy.denis@datakhi.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": []
+}

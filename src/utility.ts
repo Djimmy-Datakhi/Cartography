@@ -130,7 +130,6 @@ export class util {
 
     /**
      * Permet de calculer le zoom, en fonction de la différence de taille entre la forme et la div.
-     * Ne peut pas retourné un zoom inférieur à 1.
      * @param dataModel model de donnée, pour trouver la taille de la forme
      * @param path fonction de path, pour calculer la taille de la forme
      * @param width longueur de la div
@@ -150,7 +149,8 @@ export class util {
         var shapeWidth = boundMax[0] - boundMin[0];
         var shapeHeight = boundMax[1] - boundMin[1];
         var scale = Math.min(width / shapeWidth, (height / shapeHeight) * 0.8); // on diminue unpeu le scale de la hauteur pour pas que ca dépasse
-        return scale < 1 ? 1 : scale;
+        //return scale < 1 ? 1 : scale;
+        return scale;
     }
 
     /**

@@ -64,7 +64,7 @@ export class Map {
         this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection        
 
         //on calcule le zoom et la translation a appliquer
-        var scale = util.getZoomScale(dataModel, this.path, x, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
+        var scale = util.getZoomScale(dataModel, this.path, x*2, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
         var translate = util.getTranslation(dataModel, this.path, x, y, scale);
 
         //dessin
