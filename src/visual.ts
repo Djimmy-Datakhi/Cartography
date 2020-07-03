@@ -121,6 +121,7 @@ export class Visual implements IVisual {
                     objectName: objectName,
                     displayName: objectName,
                     properties: {
+                        show: this.settings.scale.show,
                         height: this.settings.scale.height,
                         width: this.settings.scale.width,
                         xpos: this.settings.scale.xpos,

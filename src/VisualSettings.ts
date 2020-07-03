@@ -47,6 +47,7 @@ class MapBackgroundSetting {
 class ScaleSetting {
   public rangeLevel: number;
   public colors: ColorScale ;
+  public show: boolean;
   public height: number;
   public width: number;
   public xpos: number;
@@ -56,6 +57,7 @@ class ScaleSetting {
   constructor() {
     this.rangeLevel = 6;
     this.colors = new ColorScale;
+    this.show = true;
     this.height = 250;
     this.width = 20;
     this.xpos = 100;
@@ -121,6 +123,7 @@ export class VisualSettings {
     this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
     this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 
     this.scale.colors.generateScale(); //on génère l'échelle de couleur
+    this.scale.show = util.GETVALUE(metadata.objects,"scale","show",true);
     this.scale.height = util.GETVALUE(metadata.objects,"scale","height",250);
     this.scale.width = util.GETVALUE(metadata.objects,"scale","width",20);
     this.scale.xpos = util.GETVALUE(metadata.objects,"scale","xpos",100);

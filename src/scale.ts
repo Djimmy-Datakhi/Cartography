@@ -24,6 +24,9 @@ export class Scale {
         //supprime le dessin précédent
         this.erase();
 
+        if ( ! settings.scale.show)
+            return;
+
         var elementHeight = settings.scale.height/settings.scale.rangeLevel;
         var width = settings.scale.width;
         var x = settings.scale.xpos;

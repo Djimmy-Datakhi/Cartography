@@ -89,6 +89,12 @@
             "displayName": "échelle de couleur",
             "description": "Mise en forme de l'échelle de couleur",
             "properties": {
+                "show":{
+                    "displayName": "Afficher",
+                    "type": {
+                        "bool" : true
+                    }
+                },
                 "height":{
                     "displayName": "hauteur",
                     "type": {
