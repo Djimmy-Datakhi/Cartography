@@ -21,6 +21,7 @@ import * as model from "./dataModel"
 import { Map } from "./map";
 import { Scale } from "./scale"
 import { ITooltipServiceWrapper, createTooltipServiceWrapper } from "./toolTip";
+import { LandingPage} from "./landingPage";
 
 export class Visual implements IVisual {
     private svg: Selection<SVGElement>; //div principale
@@ -29,6 +30,11 @@ export class Visual implements IVisual {
     private host: IVisualHost;
     private selectionManager: ISelectionManager;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
+    private element: HTMLElement;
+    private isLandingPageOn: boolean;
+    private LandingPageRemoved: boolean;
+    private LandingPage: Selection<any>;
+    private LandingPageHTML: LandingPage;
 
     private dataModel: model.DataModel;
     private settings: VisualSettings;
@@ -41,36 +47,68 @@ export class Visual implements IVisual {
         this.host = options.host;
         this.selectionManager = this.host.createSelectionManager();
         this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, options.element);
+        this.element = options.element;
+        this.LandingPageHTML = new LandingPage();
     }
 
     public update(options: VisualUpdateOptions) {
         console.log("update");
 
-        //parse des settings
-        this.settings.parse(options.dataViews[0]);
-        //parse du datamodel     
-        this.dataModel = model.parseDataModel(options.dataViews[0], this.settings, this.host);
-        //Attribution de la taille a la div principal
-        var width = options.viewport.width;
-        var height = options.viewport.height;
-
-        this.svg.attr('width', width);
-        this.svg.attr('height', height);
-        this.svg.on('contextmenu', (d) => { //gestion du clic gauche
-            const mouseEvent: MouseEvent = <MouseEvent> d3.event;
+        //landing page
+        this.HandleLandingPage(options);
+        if( ! this.isLandingPageOn){
+            //parse des settings
+            this.settings.parse(options.dataViews[0]);
+            //parse du datamodel     
+            this.dataModel = model.parseDataModel(options.dataViews[0], this.settings, this.host);
             
-            this.selectionManager.showContextMenu(this.host.createSelectionIdBuilder().createSelectionId(), {
-                x: mouseEvent.clientX,
-                y: mouseEvent.clientY
+            
+            //Attribution de la taille a la div principal
+            var width = options.viewport.width;
+            var height = options.viewport.height;
+
+            this.svg.attr('width', width);
+            this.svg.attr('height', height);
+            this.svg.on('contextmenu', (d) => { //gestion du clic gauche
+                const mouseEvent: MouseEvent = <MouseEvent> d3.event;
+                
+                this.selectionManager.showContextMenu(this.host.createSelectionIdBuilder().createSelectionId(), {
+                    x: mouseEvent.clientX,
+                    y: mouseEvent.clientY
+                });
+                mouseEvent.preventDefault();
             });
-            mouseEvent.preventDefault();
-        });
 
-        //dessin de l'échelle de couleur
-        this.colorScale.draw(this.dataModel, this.settings, this.selectionManager);
-        //dessin de la carte
-        this.map.draw(this.dataModel, this.settings, this.selectionManager, width / 2, height / 2, this.tooltipServiceWrapper);
+            //dessin de l'échelle de couleur
+            this.colorScale.draw(this.dataModel, this.settings, this.selectionManager);
+            //dessin de la carte
+            this.map.draw(this.dataModel, this.settings, this.selectionManager, width / 2, height / 2, this.tooltipServiceWrapper);
 
+        }
+        else{
+            this.svg.attr('width', 0);
+            this.svg.attr('height', 0);
+        }
+ 
+    }
+
+    private HandleLandingPage(options: VisualUpdateOptions) {
+        if(!options.dataViews || !options.dataViews.length) {
+            if(!this.LandingPage){
+                this.isLandingPageOn = true;
+                this.LandingPageRemoved = false;
+                const SampleLandingPage: Element = this.LandingPageHTML.getLandingPage(); //create a landing page
+                this.element.appendChild(SampleLandingPage);
+                this.LandingPage = d3.select(SampleLandingPage);
+            }   
+        } 
+        else {
+            if(this.isLandingPageOn && !this.LandingPageRemoved){
+                this.isLandingPageOn = false;
+                this.LandingPageRemoved = true;
+                this.LandingPage.remove();
+            }
+        }
     }
 
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {

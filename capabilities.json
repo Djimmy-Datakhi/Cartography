@@ -17,6 +17,7 @@
         ]
     },
     "supportsHighlight": true,
+    "supportsLandingPage": true,
     "dataViewMappings": [
         {
             "conditions": [
