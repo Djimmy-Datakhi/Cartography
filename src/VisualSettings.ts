@@ -30,7 +30,7 @@ import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
 import Fill = powerbi.Fill;
 import { ColorScale } from "./colorScale";
-import { util } from "./utility";
+import { util } from "./util";
 
 class MapBackgroundSetting {
   public selectedMap: string;
@@ -98,11 +98,11 @@ export class VisualSettings {
 
     var metadata = dataview.metadata;
     //map background setting
-    this.mapBackground.drillLevel = util.getDrillLevel(metadata.columns); //donne a quel niveau de drilldown on se trouve (commence a 0)
+    this.mapBackground.drillLevel = util.GETDRILLLEVEL(metadata.columns); //donne a quel niveau de drilldown on se trouve (commence a 0)
     this.mapBackground.mapSelection = []; //on met les découpages voulues par l'utilisateurs
-    var level1 = util.getValue(metadata.objects,"map","level1","regions");
-    var level2 = util.getValue(metadata.objects,"map","level2","departements");
-    var level3 = util.getValue(metadata.objects,"map","level3","arrondissements");
+    var level1 = util.GETVALUE(metadata.objects,"map","level1","regions");
+    var level2 = util.GETVALUE(metadata.objects,"map","level2","departements");
+    var level3 = util.GETVALUE(metadata.objects,"map","level3","arrondissements");
     this.mapBackground.mapSelection.push(level1);
     this.mapBackground.mapSelection.push(level2);
     this.mapBackground.mapSelection.push(level3);
@@ -111,21 +111,21 @@ export class VisualSettings {
     this.mapBackground.selectedMap = this.mapBackground.mapSelection[this.mapBackground.drillLevel]; //donne la carte a utiliser en fonction du niveau de drilldown
 
     //color setting
-    this.color.minColor = util.getValue(metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
-    this.color.maxColor = util.getValue(metadata.objects,"couleur","maxColor",{solid:{color:"#FF0000"}});
+    this.color.minColor = util.GETVALUE(metadata.objects,"couleur","minColor",{solid:{color:"#FFFF00"}});
+    this.color.maxColor = util.GETVALUE(metadata.objects,"couleur","maxColor",{solid:{color:"#FF0000"}});
 
     //color scale setting
-    this.scale.rangeLevel = util.getValue(metadata.objects,"couleur","colorRange",6); //donne le nombre de "catégorie" de couleur pour l'échelle
+    this.scale.rangeLevel = util.GETVALUE(metadata.objects,"couleur","colorRange",6); //donne le nombre de "catégorie" de couleur pour l'échelle
     this.scale.colors.setColor(this.color.minColor.solid.color, this.color.maxColor.solid.color); //permet de créer l'échelle de couleur a partir d'une couleur de départ et une couleur d'arrivé
     this.scale.colors.setRange(this.scale.rangeLevel); //donne a l'échelle de couleur le nombre de catégorie de couleur 
     this.scale.colors.generateScale(); //on génère l'échelle de couleur
-    this.scale.height = util.getValue(metadata.objects,"scale","height",250);
-    this.scale.width = util.getValue(metadata.objects,"scale","width",20);
-    this.scale.xpos = util.getValue(metadata.objects,"scale","xpos",100);
-    this.scale.ypos = util.getValue(metadata.objects,"scale","ypos",50);
+    this.scale.height = util.GETVALUE(metadata.objects,"scale","height",250);
+    this.scale.width = util.GETVALUE(metadata.objects,"scale","width",20);
+    this.scale.xpos = util.GETVALUE(metadata.objects,"scale","xpos",100);
+    this.scale.ypos = util.GETVALUE(metadata.objects,"scale","ypos",50);
 
     //tooltip setting
-    this.tooltip.show = util.getValue(metadata.objects,"tooltip","show",true);
+    this.tooltip.show = util.GETVALUE(metadata.objects,"tooltip","show",true);
   }
 }
 

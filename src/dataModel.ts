@@ -4,8 +4,8 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import DataView = powerbi.DataView;
 import * as geoProvider from './geoJsonProvider';
 import * as d3 from "d3";
-import { util } from "./utility";
-import { VisualSettings } from "./settings";
+import { util } from "./util";
+import { VisualSettings } from "./VisualSettings";
 
 export interface DataPoint {
     mapData; //donné de la forme géographique
@@ -24,24 +24,24 @@ export interface DataModel {
 
 export function parseDataModel(dataView: DataView, settings: VisualSettings, host: IVisualHost): DataModel {
     var dps: DataPoint[] = [];
-    var values: number[] = dataView.categorical.values[0].values as number[];
-    var highlight:number[] = dataView.categorical.values[0].highlights as number[];
-    var categories: string[] = dataView.categorical.categories[0].values as string[];
+    var values: number[] = <number[]> dataView.categorical.values[0].values;
+    var highlight:number[] = <number[]> dataView.categorical.values[0].highlights;
+    var categories: string[] = <string[]> dataView.categorical.categories[0].values;
 
     //détermines si les valeurs sont des noms ou des codes
-    var isCode:boolean = util.isCode(categories[0]);
+    var isCode:boolean = util.ISCODE(categories[0]);
     if(!isCode){     //si ce n'est pas des codes, on simplifie les noms
-        var categoriesSimple:string[] = util.simplifyStringArray(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
+        var categoriesSimple:string[] = util.SIMPLIFYSTRINGARRAY(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
 
     }
 
     //valeur extréme du dataview
-    var minValue: number = dataView.categorical.values[0].minLocal as number;
-    var maxValue: number = dataView.categorical.values[0].maxLocal as number;
+    var minValue: number = <number> dataView.categorical.values[0].minLocal;
+    var maxValue: number = <number> dataView.categorical.values[0].maxLocal;
 
     //on récupère le fond de carte si il y en a un de selectionner ou régions par défaut
     var map: string = settings.mapBackground.selectedMap ? settings.mapBackground.selectedMap : "regions";
-    var geo = geoProvider.getJson(map);
+    var geo = geoProvider.geoJsonProvider(map);
 
     //on créer la fonction d'échelle d3. Cela permettras de définir la couleur de la forme en fonction de la valeur
     var quantile = d3.scaleQuantile()
@@ -60,11 +60,11 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         var index:number;
         if(isCode){ 
             var code = geo.features[i].properties.code;
-            index = util.valueMatcher(code,categories);
+            index = util.VALUEMATCHER(code,categories);
         }
         else{
-            var nameSimple = util.simplifyString(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
-            index = util.valueMatcher(nameSimple, categoriesSimple);
+            var nameSimple = util.SIMPLIFYSTRING(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
+            index = util.VALUEMATCHER(nameSimple, categoriesSimple);
         }
         if (index == -1) //Si l'index retourner est 0, on passe a l'ittération suivante
                 continue
@@ -95,6 +95,5 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
     }
 
     //resultat
-    var model: DataModel = { data: dps, minValue: minValue, maxValue: maxValue };
-    return model;
+    return { data: dps, minValue: minValue, maxValue: maxValue }
 }

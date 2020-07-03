@@ -5,7 +5,7 @@ import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import {DataModel} from "./dataModel"
-import { VisualSettings } from "./settings";
+import { VisualSettings } from "./VisualSettings";
 
 export class Scale {
     private div: Selection<SVGElement>
@@ -38,10 +38,11 @@ export class Scale {
             .enter()
             .append('rect')
             .attr('x', '0px')
-            .attr('y', function (d) { return d * elementHeight + 'px' })
+            .attr('y', (d) => { return d * elementHeight + 'px' })
             .attr('height', elementHeight + 'px')
             .attr('width', width + 'px')
-            .attr('fill', function (d) { return settings.scale.colors.getColor(d); })
+            .attr('fill', (d) =>
+             { return settings.scale.colors.getColor(d); })
 
         //axe gradué
         var legendScale = d3.scaleLinear() //échelle linéaire pour nous permettre d'afficher les valeurs

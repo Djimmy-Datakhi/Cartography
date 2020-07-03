@@ -1,27 +1,27 @@
-import departements from "../assets/geoJson/departements.json";
-import regions from "../assets/geoJson/regions.json";
-import arrondissements from "../assets/geoJson/arrondissements.json";
-import communes from "../assets/geoJson/communes.json";
+import departementsJson from "../assets/geoJson/departements.json";
+import regionsJson from "../assets/geoJson/regions.json";
+import arrondissementsJson from "../assets/geoJson/arrondissements.json";
+import communesJson from "../assets/geoJson/communes.json";
 
 /**
  * Permet de récupérer les fichiers geoJson.
  * Les valeurs possible sont departements, regions et arrondissements.
  * @param name nom de json a récupérer
  */
-export function getJson(name: string) {
+export function geoJsonProvider(name: string) {
     var result;
     switch (name) {
         case 'regions':
-            result = regions;
+            result = regionsJson;
             break;
         case 'departements':
-            result = departements;
+            result = departementsJson;
             break;
         case 'arrondissements':
-            result = arrondissements;
+            result = arrondissementsJson;
             break;
         case 'communes':
-            result = communes;
+            result = communesJson;
             break;
     }
     return result;

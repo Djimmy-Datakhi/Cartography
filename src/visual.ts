@@ -16,7 +16,7 @@ import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
-import { VisualSettings } from "./settings";
+import { VisualSettings } from "./VisualSettings";
 import * as model from "./dataModel"
 import { Map } from "./map";
 import { Scale } from "./scale"

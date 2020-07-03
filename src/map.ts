@@ -6,18 +6,23 @@ import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 import { DataModel, DataPoint } from "./dataModel"
-import { VisualSettings } from "./settings";
-import { util } from "./utility";
+import { VisualSettings } from "./VisualSettings";
+import { util } from "./util";
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./toolTip";
+import { GeoProjection } from "d3";
 
 export class Map {
     private div: Selection<SVGElement>;
     private path;
     private previousSelected: ISelectionId[];
+    private projection: GeoProjection;
 
     constructor(svg: Selection<SVGElement>) {
         this.div = svg.append('g');
         this.previousSelected = [];
+        this.projection = d3.geoConicConformal()
+            .center([2.454071, 47.279229]) //centre de la france
+            .scale(2600) //zoom
     }
 
     public erase() {
@@ -50,69 +55,108 @@ export class Map {
             .style('stroke-width', 0);
     }
 
+    private tooltip(settings:VisualSettings,toolTip: ITooltipServiceWrapper) {
+        if (settings.tooltip.show) {
+            toolTip.addTooltip(this.div.selectAll('path'),
+                (tooltipEvent: TooltipEventArgs<number>) => Map.getTooltipData(tooltipEvent.data),
+                (tooltipEvent: TooltipEventArgs<number>) => null);
+        }
+    }
+
+    /**
+     * permet d'avoir le vecteur de translation a appliquer pour placer la forme au centre de la div  en prennant en compte le zoom.
+     * pour cela on calcul le vecteur entre le centre de la div et de la forme.
+     * Ce vecteursera multiplier par le scale. Pour compensé le décentrage du scale,on ajoute (scale - 1)*c où c est le centre de la div.
+     * @param dataModel model de donnée, nous permet de trouver le centre de la forme
+     * @param path fonction de path, pour calculer le centre de la forme
+     * @param x centre de la div
+     * @param y centre de la div
+     * @param scale facteur de zoom²
+     */
+    private getTranslation(dataModel: DataModel, x: number, y: number, scale: number): [number, number] {
+        var xtot = 0;
+        var ytot = 0;
+        var len = dataModel.data.length;
+        for (var i = 0; i < len; ++i) {
+            var center = this.path.centroid(dataModel.data[i].mapData);
+            if(center[0] && center[1]){
+                xtot = xtot + center[0];
+                ytot = ytot + center[1];
+            }
+        }
+        var translate: [number, number] = [x - (xtot / len), y - (ytot / len)]; // vecteur de translation entre le centroid de la forme et celle de la div
+        translate = [(-(scale - 1) * x + translate[0] * scale), (-(scale - 1) * y + translate[1] * scale)]; //recentrage en prenant en compte le scale
+        return translate;
+    }
+
+    /**
+     * Permet de calculer le zoom, en fonction de la différence de taille entre la forme et la div.
+     * @param dataModel model de donnée, pour trouver la taille de la forme
+     * @param path fonction de path, pour calculer la taille de la forme
+     * @param width longueur de la div
+     * @param height Largeur de la div
+     */
+    private getZoomScale(dataModel: DataModel, width: number, height: number): number {
+        var boundMax = [0, 0];
+        var boundMin = [10000, 10000];
+        var len = dataModel.data.length;
+        for (var i = 0; i < len; ++i) {
+            var bound = this.path.bounds(dataModel.data[i].mapData);
+            boundMax[0] = Math.max(boundMax[0], bound[1][0]);
+            boundMax[1] = Math.max(boundMax[1], bound[1][1]);
+            boundMin[0] = Math.min(boundMin[0], bound[0][0]);
+            boundMin[1] = Math.min(boundMin[1], bound[0][1]);
+        }
+        var shapeWidth = boundMax[0] - boundMin[0];
+        var shapeHeight = boundMax[1] - boundMin[1];
+        return Math.min(width / shapeWidth, (height / shapeHeight) * 0.8); // on diminue unpeu le scale de la hauteur pour pas que ca dépasse
+    }
+
     public draw(dataModel: DataModel, settings: VisualSettings, selectionManager: ISelectionManager, x: number, y: number, toolTip: ITooltipServiceWrapper) {
         var _this = this;
-
         //supprimer le dessin précédent
         this.erase();
-
-        //creation de la fonction de traçage
-        var projection = d3.geoConicConformal()
-            .center([2.454071, 47.279229]) //centre de la france
-            .scale(2600) //zoom
-            .translate([x, y]) //on place la carte au centre de la div
-
-        this.path = d3.geoPath().projection(projection); //on initialise la fonction de traçage avec la prise en compte de la projection        
-
+        this.projection.translate([x, y]) //on place la carte au centre de la div
+        this.path = d3.geoPath().projection(this.projection); //on initialise la fonction de traçage avec la prise en compte de la projection        
         //on calcule le zoom et la translation a appliquer
-        var scale = util.getZoomScale(dataModel, this.path, x*2, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
-        var translate = util.getTranslation(dataModel, this.path, x, y, scale);
-
+        var scale = this.getZoomScale(dataModel, x*2, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
+        var translate = this.getTranslation(dataModel,  x, y, scale);
         //dessin
-        this.div //on dessine les formes une par une
-            .selectAll('path')
+        this.div.selectAll('path')
             .data(dataModel.data)
-            .enter()
-            .append('path')
+            .enter().append('path')
             .attr('class', 'path')
-            .attr('d', function (d) { return _this.path(d.mapData) }) //dessin de la forme
-            .attr('id', function (d) { return d.name }) //nom de la forme
-            .attr('fill', function (d) { return d.color }) //couleur
+            .attr('d', (d) => { return _this.path(d.mapData) }) //dessin de la forme
+            .attr('id', (d) => { return d.name }) //nom de la forme
+            .attr('fill', (d) => { return d.color }) //couleur
             .each(function (d) {
                 //si une forme est sélectionner
                 if (selectionManager.hasSelection()) {
-                    if (d && util.contain(d.selectionId,_this.previousSelected)) { //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
-                        _this.selected(this as SVGPathElement,scale);
-                    }
+                    if (d && util.CONTAIN(d.selectionId,_this.previousSelected)) //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
+                        _this.selected(<SVGPathElement> this,scale);
                     //sinon en transparent
-                    else {
-                        _this.unselected(this as SVGPathElement);
-                    }
+                    else 
+                        _this.unselected(<SVGPathElement> this);
                 }
                 //si pas de région sélectionner
                 else {
                     //si il y a un highlight
                     if (d.highlight != null) {
                         //cette forme n'est pas sélectionner
-                        if (d.highlight === 0) {
-                            _this.unselected(this as SVGPathElement);
-                        }
-                        else {
-                            //elle est sélectionner
-                            _this.selected(this as SVGPathElement,scale);
-                        }
+                        if (d.highlight === 0) 
+                            _this.unselected(<SVGPathElement> this);
+                        else //elle est sélectionner
+                            _this.selected(<SVGPathElement> this,scale);
                     }
-                    else {
-                        //si il n'y en a pas de highlight
-                        _this.neutral(this as SVGPathElement);
-                    }
+                    else //si il n'y en a pas de highlight
+                        _this.neutral(<SVGPathElement> this);
                 }
             })
             .on('click', function (d) { //gestion du clic droit
                 //si on clic sur la forme déja sélectionner, on la désélectionne
-                if (selectionManager.hasSelection() && util.contain(d.selectionId,_this.previousSelected)) {
+                if (selectionManager.hasSelection() && util.CONTAIN(d.selectionId,_this.previousSelected)) {
                     _this.previousSelected = []
-                    d3.selectAll('path').each(function () { _this.neutral(this as SVGPathElement); })
+                    d3.selectAll('path').each(function () { _this.neutral( <SVGPathElement> this); })
                     selectionManager.clear();
                 }
                 //sinon on sélectionne la forme cliquer
@@ -120,48 +164,35 @@ export class Map {
                     if(d3.event.ctrlKey){
                         _this.previousSelected.push(d.selectionId);
                         d3.selectAll('path').each(function (d:DataPoint){ 
-                            if(d && util.contain(d.selectionId,_this.previousSelected)){
-                                _this.selected(this as SVGPathElement,scale)
-                            }
-                            else{
-                                _this.unselected(this as SVGPathElement)
-                            }
+                            if(d && util.CONTAIN(d.selectionId,_this.previousSelected))
+                                _this.selected(<SVGPathElement> this,scale)
+                            else
+                                _this.unselected(<SVGPathElement> this)
                         });
                     selectionManager.select(d.selectionId,true);
                     }
                     else{
                         _this.previousSelected = [d.selectionId]
-                        d3.selectAll('path').each(function (d){_this.unselected(this as SVGPathElement)})
-                        _this.selected(this as SVGPathElement,scale);
+                        d3.selectAll('path').each(function (d){_this.unselected(<SVGPathElement> this)})
+                        _this.selected(<SVGPathElement> this,scale);
                         selectionManager.select(d.selectionId);
                     }
                    
                 }             
             })
-            .on('contextmenu', function (d) { //gestion du clic gauche
-                const mouseEvent: MouseEvent = d3.event as MouseEvent;
+            .on('contextmenu', (d) => { //gestion du clic gauche
+                const mouseEvent: MouseEvent = <MouseEvent> d3.event;
                 selectionManager.showContextMenu(d.selectionId, {
                     x: mouseEvent.clientX,
                     y: mouseEvent.clientY
                 });
                 mouseEvent.preventDefault();
-            })
-            .each(function (d) {
-
             });
-
         //animation
         this.div
             .transition().duration(750)
-            .attr("transform", "translate(" + translate[0] + "," + translate[1] + ")scale(" + scale + ")")
-
+            .attr("transform", "translate(" + translate[0] + "," + translate[1] + ")scale(" + scale + ")")  ;
         //tooltip
-        if (settings.tooltip.show) {
-            toolTip.addTooltip(this.div.selectAll('path'),
-                (tooltipEvent: TooltipEventArgs<number>) => Map.getTooltipData(tooltipEvent.data),
-                (tooltipEvent: TooltipEventArgs<number>) => null);
-        }
-
-
+        this.tooltip(settings,toolTip);
     }
 }
