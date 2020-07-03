@@ -112,6 +112,12 @@
                     "type": {
                         "integer" : true
                     }
+                },
+                "extremum":{
+                    "displayName": "Afficher que les valeurs extrème",
+                    "type": {
+                        "bool": true
+                    }
                 }
             }
         },

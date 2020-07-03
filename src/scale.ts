@@ -54,7 +54,7 @@ export class Scale {
             .attr('id', 'legendAxis')
             .attr('transform', 'translate(' + x + ',' + y + ')')
             .call(d3.axisLeft(legendScale)
-                    .ticks((settings.scale.rangeLevel - 1) > 30 ? 30 : (settings.scale.rangeLevel - 1))
+                    .ticks(settings.scale.extremum ? 1 : (settings.scale.rangeLevel - 1))
                 );
 
     }

@@ -124,7 +124,8 @@ export class Visual implements IVisual {
                         height: this.settings.scale.height,
                         width: this.settings.scale.width,
                         xpos: this.settings.scale.xpos,
-                        ypos: this.settings.scale.ypos
+                        ypos: this.settings.scale.ypos,
+                        extremum: this.settings.scale.extremum
                     },
                     validValues:{
                         height: {
