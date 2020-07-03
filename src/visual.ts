@@ -21,7 +21,6 @@ import * as model from "./dataModel"
 import { Map } from "./map";
 import { Scale } from "./scale"
 import { ITooltipServiceWrapper, createTooltipServiceWrapper } from "./toolTip";
-import { selection } from "d3";
 
 export class Visual implements IVisual {
     private svg: Selection<SVGElement>; //div principale
@@ -57,6 +56,15 @@ export class Visual implements IVisual {
 
         this.svg.attr('width', width);
         this.svg.attr('height', height);
+        this.svg.on('contextmenu', (d) => { //gestion du clic gauche
+            const mouseEvent: MouseEvent = <MouseEvent> d3.event;
+            
+            this.selectionManager.showContextMenu(this.host.createSelectionIdBuilder().createSelectionId(), {
+                x: mouseEvent.clientX,
+                y: mouseEvent.clientY
+            });
+            mouseEvent.preventDefault();
+        });
 
         //dessin de l'échelle de couleur
         this.colorScale.draw(this.dataModel, this.settings, this.selectionManager);
