@@ -187,6 +187,7 @@ export class Map {
                     y: mouseEvent.clientY
                 });
                 mouseEvent.preventDefault();
+                d3.event.stopPropagation();
             });
         //animation
         this.div
