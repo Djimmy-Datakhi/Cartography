@@ -93,6 +93,9 @@ export class Visual implements IVisual {
     }
 
     private HandleLandingPage(options: VisualUpdateOptions) {
+        console.log(options.dataViews);
+        console.log(options.dataViews.length);
+        console.log(this.LandingPage);
         if(!options.dataViews || !options.dataViews.length) {
             if(!this.LandingPage){
                 this.isLandingPageOn = true;
@@ -107,6 +110,7 @@ export class Visual implements IVisual {
                 this.isLandingPageOn = false;
                 this.LandingPageRemoved = true;
                 this.LandingPage.remove();
+                this.LandingPage = null;
             }
         }
     }
