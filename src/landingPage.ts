@@ -30,7 +30,7 @@ private page: HTMLElement
         let textDiv = document.createElement("div");
         let p = document.createElement("p");
         p.setAttribute("class","centerText");
-        p.innerHTML = "Pour commencer a utiliser ce visuel, ajoutez vos données. Les données de localisation doit être la hiérarchie régions, départements, arrondissements, puis communes. <br>" +   
+        p.innerText = "Pour commencer a utiliser ce visuel, ajoutez vos données. Les données de localisation doit être la hiérarchie régions, départements, arrondissements, puis communes. <br>" +   
         "Vous pouvez identifier les territoires avec le code INSEE, ou avec le nom du territoire.<br>" +
         "Si vous n'avez pas la hierarchie complète, utiliser les fonction de formatage du visuel pour spécifier votre hierarchie";
         textDiv.appendChild(p);

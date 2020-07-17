@@ -17,8 +17,6 @@ export class ColorScale {
             this.startColor = start;
             this.endColor = end;
         }
-        else
-            console.log("setColor : une couleur n'est pas correcte");
     }
 
     /**
@@ -26,9 +24,7 @@ export class ColorScale {
      * @param range le nombre de couleur différente sur l'échelle. Doit être supérieur ou égale à deux
      */
     public setRange(range: number) {
-        if (range <= 1)
-            console.log("setRange : le range doit être supérieur ou égale à deux");
-        else
+        if(range >= 2)
             this.range = range;
     }
 
@@ -39,11 +35,9 @@ export class ColorScale {
      */
     public generateScale() {
         if (!this.startColor || !this.endColor) {
-            console.log("generateScale : les couleurs de l'échelle ne sont pas définis");
             return;
         }
         if (!this.range) {
-            console.log("generateScale : le range n'est pas définis");
             return;
         }
         this.scale = chroma.scale([this.startColor, this.endColor]).colors(this.range);
@@ -56,7 +50,6 @@ export class ColorScale {
      */
     public getColor(value: number): string {
         if (value >= this.range || value < 0) {
-            console.log("getColor : la valeur est incorrecte");
             return "#000000";
         }
         if (this.scale.length === 0) {

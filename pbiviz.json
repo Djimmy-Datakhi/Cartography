@@ -5,7 +5,7 @@
         "guid": "cartography6439711748644562B5895D8406A5421D",
         "visualClassName": "Visual",
         "version": "1.0.0",
-        "description": "Map of france with 4 differents built-in geographic divisions (Régions, Département, Arrondissement, Communes). user have to select which division they want to display for each drill level.",
+        "description": "Carte choroplèthe de la France avec la possibilité de drilldown. Il existe 4 niveau de détail, régions, départements, arrondissements et communes. Le découpage des territoires se fait automatiquement.",
         "supportUrl": "",
         "gitHubUrl": ""
     },

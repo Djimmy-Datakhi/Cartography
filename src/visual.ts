@@ -66,10 +66,8 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        console.log("update");
-
         //landing page
-        this.HandleLandingPage(options);
+        this.handleLandingPage(options);
         if( ! this.isLandingPageOn){
             //parse des settings
             this.settings.parse(options.dataViews[0]);
@@ -107,10 +105,7 @@ export class Visual implements IVisual {
  
     }
 
-    private HandleLandingPage(options: VisualUpdateOptions) {
-        console.log(options.dataViews);
-        console.log(options.dataViews.length);
-        console.log(this.LandingPage);
+    private handleLandingPage(options: VisualUpdateOptions) {
         if(!options.dataViews || !options.dataViews.length) {
             if(!this.LandingPage){
                 this.isLandingPageOn = true;
