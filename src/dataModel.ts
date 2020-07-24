@@ -34,7 +34,7 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         var categoriesSimple:string[] = util.SIMPLIFYSTRINGARRAY(categories); //on simplifie le nom des catégorie pour facilité le matching avec le nom des formes
 
     }
-
+    
     //valeur extréme du dataview
     var minValue: number = <number> dataView.categorical.values[0].minLocal;
     var maxValue: number = <number> dataView.categorical.values[0].maxLocal;

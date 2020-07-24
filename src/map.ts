@@ -121,6 +121,7 @@ export class Map {
         //on calcule le zoom et la translation a appliquer
         var scale = this.getZoomScale(dataModel, x*2, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
         var translate = this.getTranslation(dataModel,  x, y, scale);
+
         //dessin
         this.div.selectAll('path')
             .data(dataModel.data)
