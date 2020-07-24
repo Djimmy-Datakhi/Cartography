@@ -53,7 +53,7 @@ export class Visual implements IVisual {
         this.selectionManager = this.host.createSelectionManager();
         this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, options.element);
         this.element = options.element;
-        this.LandingPageHTML = new LandingPage();
+        this.LandingPageHTML = new LandingPage(this.host);
     }
 
     public createLogo(width:number,height:number){

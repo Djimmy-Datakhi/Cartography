@@ -6,7 +6,7 @@
         "visualClassName": "Visual",
         "version": "1.0.0",
         "description": "Carte choroplèthe de la France avec la possibilité de drilldown. Il existe 4 niveau de détail, régions, départements, arrondissements et communes. Le découpage des territoires se fait automatiquement.",
-        "supportUrl": "https://www.google.com",
+        "supportUrl": "https://datakhi.fr",
         "gitHubUrl": ""
     },
     "apiVersion": "2.6.0",

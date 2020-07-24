@@ -1,8 +1,13 @@
-export class LandingPage {
-    private page: HTMLElement
+import powerbi from "powerbi-visuals-api";
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 
-    constructor() {
+export class LandingPage {
+    private page: HTMLElement;
+    private host:IVisualHost;
+
+    constructor(host:IVisualHost) {
         this.page = document.createElement("div");
+        this.host = host;
 
         let header = document.createElement("h1");
         header.textContent = "France DrillDown";
@@ -20,6 +25,7 @@ export class LandingPage {
         img.setAttribute("class", "center");
         img.setAttribute("width", "350");
         img.setAttribute("height", "60");
+        img.addEventListener("click", () => {this.host.launchUrl("http://datakhi.fr")})
         comDiv.appendChild(text);
         logo.appendChild(img);
         comDiv.appendChild(logo);
