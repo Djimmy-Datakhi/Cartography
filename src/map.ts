@@ -76,12 +76,13 @@ export class Map {
     private getTranslation(dataModel: DataModel, x: number, y: number, scale: number): [number, number] {
         var xtot = 0;
         var ytot = 0;
-        var len = dataModel.data.length;
-        for (var i = 0; i < len; ++i) {
+        var len = 0;
+        for (var i = 0; i < dataModel.data.length; ++i) {
             var center = this.path.centroid(dataModel.data[i].mapData);
             if(center[0] && center[1]){
                 xtot = xtot + center[0];
                 ytot = ytot + center[1];
+                len = len + 1;
             }
         }
         var translate: [number, number] = [x - (xtot / len), y - (ytot / len)]; // vecteur de translation entre le centroid de la forme et celle de la div
@@ -99,13 +100,14 @@ export class Map {
     private getZoomScale(dataModel: DataModel, width: number, height: number): number {
         var boundMax = [0, 0];
         var boundMin = [10000, 10000];
-        var len = dataModel.data.length;
-        for (var i = 0; i < len; ++i) {
+        for (var i = 0; i < dataModel.data.length; ++i) {
             var bound = this.path.bounds(dataModel.data[i].mapData);
-            boundMax[0] = Math.max(boundMax[0], bound[1][0]);
-            boundMax[1] = Math.max(boundMax[1], bound[1][1]);
-            boundMin[0] = Math.min(boundMin[0], bound[0][0]);
-            boundMin[1] = Math.min(boundMin[1], bound[0][1]);
+            if(bound[0] && bound[1]){
+                boundMax[0] = Math.max(boundMax[0], bound[1][0]);
+                boundMax[1] = Math.max(boundMax[1], bound[1][1]);
+                boundMin[0] = Math.min(boundMin[0], bound[0][0]);
+                boundMin[1] = Math.min(boundMin[1], bound[0][1]);
+            }
         }
         var shapeWidth = boundMax[0] - boundMin[0];
         var shapeHeight = boundMax[1] - boundMin[1];
