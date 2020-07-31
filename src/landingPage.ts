@@ -25,7 +25,7 @@ export class LandingPage {
         img.setAttribute("class", "center");
         img.setAttribute("width", "350");
         img.setAttribute("height", "60");
-        img.addEventListener("click", () => {this.host.launchUrl("http://datakhi.fr")})
+        img.addEventListener("click", () => {this.host.launchUrl("https://datakhi.fr")})
         comDiv.appendChild(text);
         logo.appendChild(img);
         comDiv.appendChild(logo);

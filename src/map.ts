@@ -36,28 +36,28 @@ export class Map {
         }];
     }
 
-    private selected(shape: SVGPathElement,scale:number) {
+    private selected(shape: SVGPathElement, scale: number) {
         d3.select(shape)
             .style('opacity', 1)
-            .style('stroke-width', 1/scale)
+            .style('stroke-width', 1 / scale)
             .style('stroke', 'black');
     }
 
-    private unselected(shape: SVGPathElement,scale:number) {
+    private unselected(shape: SVGPathElement, scale: number) {
         d3.select(shape)
             .style('opacity', 0.5)
-            .style('stroke-width', (1/scale)/2)
+            .style('stroke-width', (1 / scale) / 2)
             .style('stroke', 'grey');
     }
 
-    private neutral(shape: SVGElement,scale:number) {
+    private neutral(shape: SVGElement, scale: number) {
         d3.select(shape)
             .style('opacity', 1)
-            .style('stroke-width', (1/scale)/2)
+            .style('stroke-width', (1 / scale) / 2)
             .style('stroke', 'grey');
     }
 
-    private tooltip(settings:VisualSettings,toolTip: ITooltipServiceWrapper) {
+    private tooltip(settings: VisualSettings, toolTip: ITooltipServiceWrapper) {
         if (settings.tooltip.show) {
             toolTip.addTooltip(this.div.selectAll('path'),
                 (tooltipEvent: TooltipEventArgs<number>) => Map.getTooltipData(tooltipEvent.data),
@@ -76,20 +76,8 @@ export class Map {
      * @param scale facteur de zoom²
      */
     private getTranslation(dataModel: DataModel, x: number, y: number, scale: number): [number, number] {
-        var xtot = 0;
-        var ytot = 0;
-        var len = 0;
-        for (var i = 0; i < dataModel.data.length; ++i) {
-            if(dataModel.data[i].value === 0)
-                continue            
-            var center = this.path.centroid(dataModel.data[i].mapData);
-            if(center[0] && center[1]){
-                xtot = xtot + center[0];
-                ytot = ytot + center[1];
-                len = len + 1;
-            }
-        }
-        var translate: [number, number] = [x - (xtot / len), y - (ytot / len)]; // vecteur de translation entre le centroid de la forme et celle de la div
+        var centroid = util.GETCENTROID(dataModel.data, this.path);
+        var translate: [number, number] = [x - centroid[0], y - centroid[1]]; // vecteur de translation entre le centroid de la forme et celle de la div
         translate = [(-(scale - 1) * x + translate[0] * scale), (-(scale - 1) * y + translate[1] * scale)]; //recentrage en prenant en compte le scale
         return translate;
     }
@@ -102,23 +90,37 @@ export class Map {
      * @param height Largeur de la div
      */
     private getZoomScale(dataModel: DataModel, width: number, height: number): number {
-        var boundMax = [0, 0];
-        var boundMin = [10000, 10000];
-        for (var i = 0; i < dataModel.data.length; ++i) {
-            if(dataModel.data[i].value === 0)
-                continue    
-            var bound = this.path.bounds(dataModel.data[i].mapData);
-            if(bound[0] && bound[1]){
-                boundMax[0] = Math.max(boundMax[0], bound[1][0]);
-                boundMax[1] = Math.max(boundMax[1], bound[1][1]);
-                boundMin[0] = Math.min(boundMin[0], bound[0][0]);
-                boundMin[1] = Math.min(boundMin[1], bound[0][1]);
-            }
-        }
+        var bound = util.GETEXTREMUMBOUND(dataModel.data, this.path);
+        var boundMax = bound[1];
+        var boundMin = bound[0];
         var shapeWidth = boundMax[0] - boundMin[0];
         var shapeHeight = boundMax[1] - boundMin[1];
         return Math.min(width / shapeWidth, (height / shapeHeight) * 0.8); // on diminue unpeu le scale de la hauteur pour pas que ca dépasse
     }
+
+    /**
+     * permet de réduire le nombre de forme a afficher, en supprimant les formes vide qui sont trop loin et ne seront pas vu par l'utilisateur.
+     * @param dataModel model de donnée, contient la forme a déssiné et les formes vide
+     * @param width largeur de la div
+     * @param height hauteur de la div
+     * @param scale taux de zoom
+     */
+    private cleanShape(dataModel: DataModel, width: number, height: number, scale: number) {
+        var filledmap: DataPoint[] = dataModel.data;
+        var emptymap: DataPoint[] = dataModel.emptyShape;
+        var centroid = util.GETCENTROID(filledmap, this.path);
+        width = width / scale;
+        height = height / scale;
+        var maxDist = (Math.pow(width, 2) + Math.pow(height, 2));
+        for (var i = 0; i < emptymap.length; ++i) {
+            var center = this.path.centroid(emptymap[i].mapData);
+            var dist = Math.pow((center[0] - centroid[0]), 2) + Math.pow((center[1] - centroid[1]), 2);
+            if (dist < maxDist) {
+                filledmap.push(emptymap[i]);
+            }
+        }
+    }
+
 
     public draw(dataModel: DataModel, settings: VisualSettings, selectionManager: ISelectionManager, x: number, y: number, toolTip: ITooltipServiceWrapper) {
         var _this = this;
@@ -127,8 +129,9 @@ export class Map {
         this.projection.translate([x, y]) //on place la carte au centre de la div
         this.path = d3.geoPath().projection(this.projection); //on initialise la fonction de traçage avec la prise en compte de la projection        
         //on calcule le zoom et la translation a appliquer
-        var scale = this.getZoomScale(dataModel, x*2, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
-        var translate = this.getTranslation(dataModel,  x, y, scale);
+        var scale = this.getZoomScale(dataModel, x * 2, y * 2); //on considère la hauteur entière car on veut que la forme prenne toute la hauteur de la div
+        var translate = this.getTranslation(dataModel, x, y, scale);
+        this.cleanShape(dataModel, x * 2, y * 2, scale);
 
         //dessin
         this.div.selectAll('path')
@@ -141,60 +144,60 @@ export class Map {
             .each(function (d) {
                 //si une forme est sélectionner
                 if (selectionManager.hasSelection()) {
-                    if (d && util.CONTAIN(d.selectionId,_this.previousSelected)) //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
-                        _this.selected(<SVGPathElement> this,scale);
+                    if (d && util.CONTAIN(d.selectionId, _this.previousSelected)) //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
+                        _this.selected(<SVGPathElement>this, scale);
                     //sinon en transparent
-                    else 
-                        _this.unselected(<SVGPathElement> this,scale);
+                    else
+                        _this.unselected(<SVGPathElement>this, scale);
                 }
                 //si pas de région sélectionner
                 else {
                     //si il y a un highlight
                     if (d.highlight != null) {
                         //cette forme n'est pas sélectionner
-                        if (d.highlight === 0) 
-                            _this.unselected(<SVGPathElement> this,scale);
+                        if (d.highlight === 0)
+                            _this.unselected(<SVGPathElement>this, scale);
                         else //elle est sélectionner
-                            _this.selected(<SVGPathElement> this,scale);
+                            _this.selected(<SVGPathElement>this, scale);
                     }
                     else //si il n'y en a pas de highlight
-                        _this.neutral(<SVGPathElement> this,scale);
+                        _this.neutral(<SVGPathElement>this, scale);
                 }
             })
             .on('click', function (d) { //gestion du clic droit
                 //si on clic sur la forme déja sélectionner, on la désélectionne
                 if (d.selectionId == null)
                     return;
-                if (selectionManager.hasSelection() && util.CONTAIN(d.selectionId,_this.previousSelected)) {
+                if (selectionManager.hasSelection() && util.CONTAIN(d.selectionId, _this.previousSelected)) {
                     _this.previousSelected = []
-                    d3.selectAll('path').each(function () { _this.neutral( <SVGPathElement> this,scale); })
+                    d3.selectAll('path').each(function () { _this.neutral(<SVGPathElement>this, scale); })
                     selectionManager.clear();
                 }
                 //sinon on sélectionne la forme cliquer
                 else {
-                    if(d3.event.ctrlKey){
+                    if (d3.event.ctrlKey) {
                         _this.previousSelected.push(d.selectionId);
-                        d3.selectAll('path').each(function (d:DataPoint){ 
-                            if(d && util.CONTAIN(d.selectionId,_this.previousSelected))
-                                _this.selected(<SVGPathElement> this,scale)
+                        d3.selectAll('path').each(function (d: DataPoint) {
+                            if (d && util.CONTAIN(d.selectionId, _this.previousSelected))
+                                _this.selected(<SVGPathElement>this, scale)
                             else
-                                _this.unselected(<SVGPathElement> this,scale)
+                                _this.unselected(<SVGPathElement>this, scale)
                         });
-                    selectionManager.select(d.selectionId,true);
+                        selectionManager.select(d.selectionId, true);
                     }
-                    else{
+                    else {
                         _this.previousSelected = [d.selectionId]
-                        d3.selectAll('path').each(function (d){_this.unselected(<SVGPathElement> this,scale)})
-                        _this.selected(<SVGPathElement> this,scale);
+                        d3.selectAll('path').each(function (d) { _this.unselected(<SVGPathElement>this, scale) })
+                        _this.selected(<SVGPathElement>this, scale);
                         selectionManager.select(d.selectionId);
                     }
-                   
-                }             
+
+                }
             })
             .on('contextmenu', (d) => { //gestion du clic gauche
-                if(d.selectionId == null)
+                if (d.selectionId == null)
                     return;
-                const mouseEvent: MouseEvent = <MouseEvent> d3.event;
+                const mouseEvent: MouseEvent = <MouseEvent>d3.event;
                 selectionManager.showContextMenu(d.selectionId, {
                     x: mouseEvent.clientX,
                     y: mouseEvent.clientY
@@ -205,8 +208,8 @@ export class Map {
         //animation
         this.div
             .transition().duration(750)
-            .attr("transform", "translate(" + translate[0] + "," + translate[1] + ")scale(" + scale + ")")  ;
+            .attr("transform", "translate(" + translate[0] + "," + translate[1] + ")scale(" + scale + ")");
         //tooltip
-        this.tooltip(settings,toolTip);
+        this.tooltip(settings, toolTip);
     }
 }

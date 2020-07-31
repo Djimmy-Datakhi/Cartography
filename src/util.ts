@@ -10,7 +10,7 @@ export class util {
      * Permet de tester si un string est un code (composer entiérement de numero)
      * @param value valeur a tester
      */
-    public static ISCODE(value:string){
+    public static ISCODE(value: string) {
         return !isNaN(+value);
     }
 
@@ -23,8 +23,6 @@ export class util {
      */
     public static VALUEMATCHER(shapeName: string, categories: string[]): number {
         for (var i = 0; i < categories.length; ++i) {
-            console.log(shapeName);
-            console.log(categories[i]);
             if (shapeName == categories[i]) {
                 return i;
             }
@@ -58,19 +56,19 @@ export class util {
      */
     public static GETDRILLLEVEL(metadata: powerbi.DataViewMetadataColumn[]): number {
         var result: number = 0;
-        var correction:boolean = false;
+        var correction: boolean = false;
         for (var i = 0; i < metadata.length; ++i) { // parcour les métadonnées de toute les colonnes
             if (metadata[i].roles.category) { //regarde si la colonnes est bien une category (et pas une value ou measure)
                 if (result < metadata[i].index) //prend l'index le plus haut
                     result = metadata[i].index;
             }
             else {
-                if(result >= metadata[i].index) //si une mesure s'est mis entre les catégories, on va devoir corriger le décalage d'index
+                if (result >= metadata[i].index) //si une mesure s'est mis entre les catégories, on va devoir corriger le décalage d'index
                     correction = true
             }
         }
-        if(correction) //on corrige le décalage d'index si besoin
-            result = result -1
+        if (correction) //on corrige le décalage d'index si besoin
+            result = result - 1
         if (result > 3) //si l'index est trop grand (ne devrait pas arriver sur une hierarchie de 4 niveau) on le remet a 3
             return 3;
         return result;
@@ -101,11 +99,51 @@ export class util {
      * @param value SelectionID courant
      * @param array Tableau de SelectionID
      */
-    public static CONTAIN(value:ISelectionId,array:ISelectionId[]): boolean{
-        for(var i = 0;i<array.length;++i){
-            if(JSON.stringify(value) === JSON.stringify(array[i]))
+    public static CONTAIN(value: ISelectionId, array: ISelectionId[]): boolean {
+        for (var i = 0; i < array.length; ++i) {
+            if (JSON.stringify(value) === JSON.stringify(array[i]))
                 return true
         }
         return false;
+    }
+
+    /**
+     * Permet d'avoir les limites maximum et minimum d'un groupe de formes
+     * @param data donnée des formes
+     * @param path objet de tracage
+     */
+    public static GETEXTREMUMBOUND(data, path): [[number, number], [number, number]] {
+        var boundMax: [number, number] = [0, 0];
+        var boundMin: [number, number] = [10000, 10000];
+        for (var i = 0; i < data.length; ++i) {
+            var bound = path.bounds(data[i].mapData);
+            if (bound[0] && bound[1]) {
+                boundMax[0] = Math.max(boundMax[0], bound[1][0]);
+                boundMax[1] = Math.max(boundMax[1], bound[1][1]);
+                boundMin[0] = Math.min(boundMin[0], bound[0][0]);
+                boundMin[1] = Math.min(boundMin[1], bound[0][1]);
+            }
+        }
+        return [boundMin, boundMax];
+    }
+
+    /**
+     * Permet d'avoir le centre d'un groupe de formes
+     * @param data donnée des formes
+     * @param path objet de tracage
+     */
+    public static GETCENTROID(data, path): [number, number] {
+        var xtot = 0;
+        var ytot = 0;
+        var len = 0;
+        for (var i = 0; i < data.length; ++i) {
+            var center = path.centroid(data[i].mapData);
+            if (center[0] && center[1]) {
+                xtot = xtot + center[0];
+                ytot = ytot + center[1];
+                len = len + 1;
+            }
+        }
+        return [xtot / len, ytot / len]
     }
 }
