@@ -23,7 +23,9 @@ export class util {
      */
     public static VALUEMATCHER(shapeName: string, categories: string[]): number {
         for (var i = 0; i < categories.length; ++i) {
-            if (shapeName === categories[i]) {
+            console.log(shapeName);
+            console.log(categories[i]);
+            if (shapeName == categories[i]) {
                 return i;
             }
         }

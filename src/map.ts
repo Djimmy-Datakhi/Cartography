@@ -9,7 +9,7 @@ import { DataModel, DataPoint } from "./dataModel"
 import { VisualSettings } from "./VisualSettings";
 import { util } from "./util";
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./toolTip";
-import { GeoProjection } from "d3";
+import { GeoProjection, selection } from "d3";
 
 export class Map {
     private div: Selection<SVGElement>;
@@ -43,16 +43,18 @@ export class Map {
             .style('stroke', 'black');
     }
 
-    private unselected(shape: SVGPathElement) {
+    private unselected(shape: SVGPathElement,scale:number) {
         d3.select(shape)
             .style('opacity', 0.5)
-            .style('stroke-width', 0);
+            .style('stroke-width', (1/scale)/2)
+            .style('stroke', 'grey');
     }
 
-    private neutral(shape: SVGElement) {
+    private neutral(shape: SVGElement,scale:number) {
         d3.select(shape)
             .style('opacity', 1)
-            .style('stroke-width', 0);
+            .style('stroke-width', (1/scale)/2)
+            .style('stroke', 'grey');
     }
 
     private tooltip(settings:VisualSettings,toolTip: ITooltipServiceWrapper) {
@@ -78,6 +80,8 @@ export class Map {
         var ytot = 0;
         var len = 0;
         for (var i = 0; i < dataModel.data.length; ++i) {
+            if(dataModel.data[i].value === 0)
+                continue            
             var center = this.path.centroid(dataModel.data[i].mapData);
             if(center[0] && center[1]){
                 xtot = xtot + center[0];
@@ -101,6 +105,8 @@ export class Map {
         var boundMax = [0, 0];
         var boundMin = [10000, 10000];
         for (var i = 0; i < dataModel.data.length; ++i) {
+            if(dataModel.data[i].value === 0)
+                continue    
             var bound = this.path.bounds(dataModel.data[i].mapData);
             if(bound[0] && bound[1]){
                 boundMax[0] = Math.max(boundMax[0], bound[1][0]);
@@ -139,7 +145,7 @@ export class Map {
                         _this.selected(<SVGPathElement> this,scale);
                     //sinon en transparent
                     else 
-                        _this.unselected(<SVGPathElement> this);
+                        _this.unselected(<SVGPathElement> this,scale);
                 }
                 //si pas de région sélectionner
                 else {
@@ -147,19 +153,21 @@ export class Map {
                     if (d.highlight != null) {
                         //cette forme n'est pas sélectionner
                         if (d.highlight === 0) 
-                            _this.unselected(<SVGPathElement> this);
+                            _this.unselected(<SVGPathElement> this,scale);
                         else //elle est sélectionner
                             _this.selected(<SVGPathElement> this,scale);
                     }
                     else //si il n'y en a pas de highlight
-                        _this.neutral(<SVGPathElement> this);
+                        _this.neutral(<SVGPathElement> this,scale);
                 }
             })
             .on('click', function (d) { //gestion du clic droit
                 //si on clic sur la forme déja sélectionner, on la désélectionne
+                if (d.selectionId == null)
+                    return;
                 if (selectionManager.hasSelection() && util.CONTAIN(d.selectionId,_this.previousSelected)) {
                     _this.previousSelected = []
-                    d3.selectAll('path').each(function () { _this.neutral( <SVGPathElement> this); })
+                    d3.selectAll('path').each(function () { _this.neutral( <SVGPathElement> this,scale); })
                     selectionManager.clear();
                 }
                 //sinon on sélectionne la forme cliquer
@@ -170,13 +178,13 @@ export class Map {
                             if(d && util.CONTAIN(d.selectionId,_this.previousSelected))
                                 _this.selected(<SVGPathElement> this,scale)
                             else
-                                _this.unselected(<SVGPathElement> this)
+                                _this.unselected(<SVGPathElement> this,scale)
                         });
                     selectionManager.select(d.selectionId,true);
                     }
                     else{
                         _this.previousSelected = [d.selectionId]
-                        d3.selectAll('path').each(function (d){_this.unselected(<SVGPathElement> this)})
+                        d3.selectAll('path').each(function (d){_this.unselected(<SVGPathElement> this,scale)})
                         _this.selected(<SVGPathElement> this,scale);
                         selectionManager.select(d.selectionId);
                     }
@@ -184,6 +192,8 @@ export class Map {
                 }             
             })
             .on('contextmenu', (d) => { //gestion du clic gauche
+                if(d.selectionId == null)
+                    return;
                 const mouseEvent: MouseEvent = <MouseEvent> d3.event;
                 selectionManager.showContextMenu(d.selectionId, {
                     x: mouseEvent.clientX,
