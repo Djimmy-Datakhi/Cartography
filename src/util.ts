@@ -35,7 +35,10 @@ export class util {
      * @param str string a simplifier
      */
     public static SIMPLIFYSTRING(str: string): string {
-        return str.replace(/[^a-zA-Z ]|\s/g, "");
+        if(str)
+            return str.replace(/[^a-zA-Z ]|\s/g, "");
+        else
+            return str;
     }
 
     /**

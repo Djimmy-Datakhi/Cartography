@@ -30,16 +30,9 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
     var highlight: number[] = <number[]>dataView.categorical.values[0].highlights;
     var categories: string[] = <string[]>dataView.categorical.categories[0].values;
 
-    var nullIndex: number = 1000000;
-    //retire la catégorie null
-    for (var i = 0; i < categories.length; ++i) {
-        if (categories[i] === null) {
-            categories.splice(i, 1);
-            values.splice(i, 1);
-            nullIndex = i;
-            break;
-        }
-    }
+
+    
+
 
     //détermines si les valeurs sont des noms ou des codes
     var isCode: boolean = util.ISCODE(categories[0]);
@@ -81,7 +74,7 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
             var nameSimple: string = util.SIMPLIFYSTRING(name); //on simplifie le nom de la forme pour faciliter le matching avec le nom des catégories
             index = util.VALUEMATCHER(nameSimple, categoriesSimple);
         }
-        if (index == -1) //Si l'index retourner est 0, on passe a l'ittération suivante
+        if (index == -1) //Si l'index retourner est -1, on passe a l'ittération suivante
         {
             var dp: DataPoint = { name: name, mapData: feat, value: 0, color: "#FFFFFF", selectionId: null, highlight: null };
             empty.push(dp);
@@ -104,10 +97,7 @@ export function parseDataModel(dataView: DataView, settings: VisualSettings, hos
         var color = settings.scale.colors.getColor(quantile(value)); //on utilise la fonction d'échelle créer précedemment
 
         //création de l'id de selection de la forme
-        if (index >= nullIndex)
-            var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index + 1).createSelectionId()
-        else
-            var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index).createSelectionId()
+        var selectionId = host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index).createSelectionId()
 
         var dp: DataPoint = { name: name, mapData: feat, value: value, color: color, selectionId: selectionId, highlight: highVal };
         dps.push(dp);
