@@ -15,6 +15,7 @@ export class Map {
     private div: Selection<SVGElement>;
     private path;
     private previousSelected: ISelectionId[];
+    private previousDrillLevel: number;
     private projection: GeoProjection;
 
     constructor(svg: Selection<SVGElement>) {
@@ -23,6 +24,7 @@ export class Map {
         this.projection = d3.geoConicConformal()
             .center([2.454071, 47.279229]) //centre de la france
             .scale(2600) //zoom
+        this.previousDrillLevel = 0;
     }
 
     public erase() {
@@ -142,6 +144,12 @@ export class Map {
             .attr('id', (d) => { return d.name }) //nom de la forme
             .attr('fill', (d) => { return d.color }) //couleur
             .each(function (d) {
+                //si on effectue un Drill up on désélectionne tout
+                if(settings.mapBackground.drillLevel != _this.previousDrillLevel){
+                    _this.previousSelected = []
+                    d3.selectAll('path').each(function () { _this.neutral(<SVGPathElement>this, scale); })
+                    selectionManager.clear();
+                }
                 //si une forme est sélectionner
                 if (selectionManager.hasSelection()) {
                     if (d && util.CONTAIN(d.selectionId, _this.previousSelected)) //update créer une nouvelle instance de selectionId, il faut donc trouve un autre moyen de tester l'égalité. 
@@ -165,10 +173,16 @@ export class Map {
                 }
             })
             .on('click', function (d) { //gestion du clic droit
-                //si on clic sur la forme déja sélectionner, on la désélectionne
                 if (d.selectionId == null)
                     return;
+                 //si on clic sur la forme déja sélectionner, on la désélectionne
                 if (selectionManager.hasSelection() && util.CONTAIN(d.selectionId, _this.previousSelected)) {
+                    _this.previousSelected = []
+                    d3.selectAll('path').each(function () { _this.neutral(<SVGPathElement>this, scale); })
+                    selectionManager.clear();
+                }
+                //si on effectue un drill down, on désélectionne tout
+                else if(settings.mapBackground.drillLevel != _this.previousDrillLevel){
                     _this.previousSelected = []
                     d3.selectAll('path').each(function () { _this.neutral(<SVGPathElement>this, scale); })
                     selectionManager.clear();
@@ -205,6 +219,8 @@ export class Map {
                 mouseEvent.preventDefault();
                 d3.event.stopPropagation();
             });
+
+        this.previousDrillLevel = settings.mapBackground.drillLevel;
         //animation
         this.div
             .transition().duration(750)
