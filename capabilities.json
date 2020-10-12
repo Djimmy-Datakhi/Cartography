@@ -1,12 +1,14 @@
 {
     "dataRoles": [
         {
-            "displayName": "Localisation",
+            "displayName": "Localization",
+            "displayNameKey": "localization",
             "name": "category",
             "kind": "Grouping"
         },
         {
-            "displayName": "Valeur",
+            "displayName": "Value",
+            "displayNameKey": "Value",
             "name": "measure",
             "kind": "Measure"
         }
@@ -43,11 +45,12 @@
     ],
     "objects": {
         "couleur": {
-            "displayName": "couleur",
-            "description": "Choix des couleurs",
+            "displayName": "Color",
+            "displayNameKey": "color",
             "properties": {
                 "minColor":{
-                    "displayName": "Couleur Minimal",
+                    "displayName": "Minimal Color",
+                    "displayNameKey": "colorMin",
                     "type": {
                         "fill" :{
                             "solid": {
@@ -57,7 +60,8 @@
                     }                    
                 },
                 "maxColor":{
-                    "displayName": "Couleur Maximal",
+                    "displayName": "Maximal Color",
+                    "displayNameKey": "ColorMax",
                     "type": {
                         "fill" :{
                             "solid": {
@@ -67,7 +71,8 @@
                     }                    
                 },
                 "colorRange":{
-                    "displayName": "Niveau de couleur",
+                    "displayName": "Color Level",
+                    "displayNameKey": "colorLevel",
                     "type": {
                         "integer": true
                     }
@@ -75,11 +80,12 @@
             }
         },
         "tooltip": {
-            "displayName": "info bulle",
-            "description" : "affichage de l'info bulle",
+            "displayName": "Tooltip",
+            "displayNameKey": "tooltip",
             "properties": {
                 "show":{
-                    "displayName" : "afficher",
+                    "displayName" : "display",
+                    "displayNameKey": "display",
                     "type": {
                         "bool" : true
                     }
@@ -87,23 +93,26 @@
             }
         },
         "scale":{
-            "displayName": "échelle de couleur",
-            "description": "Mise en forme de l'échelle de couleur",
+            "displayName": "Color scale",
+            "displayNameKey": "colorScale",
             "properties": {
                 "show":{
-                    "displayName": "Afficher",
+                    "displayName": "display",
+                    "displayNameKey": "display",
                     "type": {
                         "bool" : true
                     }
                 },
                 "height":{
-                    "displayName": "hauteur",
+                    "displayName": "height",
+                    "displayNameKey": "height",
                     "type": {
                         "integer" : true
                     }
                 },
                 "width":{
-                    "displayName": "largeur",
+                    "displayName": "width",
+                    "displayNameKey": "width",
                     "type": {
                         "integer" : true
                     }
@@ -121,7 +130,8 @@
                     }
                 },
                 "extremum":{
-                    "displayName": "Afficher que les valeurs extrème",
+                    "displayName": "display only extrem value",
+                    "displayNameKey": "displayExtremum",
                     "type": {
                         "bool": true
                     }
@@ -129,11 +139,12 @@
             }
         },
         "map":{
-            "displayName": "Découpage",
-            "description": "Choix du découpage de la carte",
+            "displayName": "Division",
+            "displayNameKey": "Division",
             "properties":{
                 "level1": {
-                    "displayName": "1er Niveau",
+                    "displayName": "1st level",
+                    "displayNameKey": "level1",
                     "type": {
                         "enumeration":[
                             {
@@ -152,7 +163,8 @@
                     }
                 },
                 "level2": {
-                    "displayName": "2eme Niveau",
+                    "displayName": "2nd level",
+                    "displayNameKey": "level2",
                     "type": {
                         "enumeration":[
                             {
@@ -172,6 +184,7 @@
                 },
                 "level3": {
                     "displayName": "3eme Niveau",
+                    "displayNameKey": "3rd level",
                     "type": {
                         "enumeration":[
                             {

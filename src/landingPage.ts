@@ -1,13 +1,16 @@
 import powerbi from "powerbi-visuals-api";
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import ILocalizationManager= powerbi.extensibility.ILocalizationManager;
 
 export class LandingPage {
     private page: HTMLElement;
     private host:IVisualHost;
+    private localization: ILocalizationManager;
 
     constructor(host:IVisualHost) {
         this.page = document.createElement("div");
         this.host = host;
+        this.localization = host.createLocalizationManager();
 
         let header = document.createElement("h1");
         header.textContent = "France DrillDown";
@@ -34,9 +37,12 @@ export class LandingPage {
         let textDiv = document.createElement("div");
         let br = document.createElement("br");
 
-        textDiv.appendChild(this.createtext("Pour commencer a utiliser ce visuel, ajoutez vos données. Les données de localisation doit être la hiérarchie régions, départements, arrondissements, puis communes."));
-        textDiv.appendChild(this.createtext("Vous pouvez identifier les territoires avec le code INSEE, ou avec le nom du territoire."));
-        textDiv.appendChild(this.createtext("Si vous n'avez pas la hierarchie complète, utiliser les fonctions de formatage du visuel pour spécifier votre hierarchie"));
+        //textDiv.appendChild(this.createtext("Pour commencer a utiliser ce visuel, ajoutez vos données. Les données de localisation doit être la hiérarchie régions, départements, arrondissements, puis communes."));
+        textDiv.appendChild(this.createtext(this.localization.getDisplayName("description1")));
+        //textDiv.appendChild(this.createtext("Vous pouvez identifier les territoires avec le code INSEE, ou avec le nom du territoire."));
+        textDiv.appendChild(this.createtext(this.localization.getDisplayName("description2")));
+        //textDiv.appendChild(this.createtext("Si vous n'avez pas la hierarchie complète, utiliser les fonctions de formatage du visuel pour spécifier votre hierarchie"));
+        textDiv.appendChild(this.createtext(this.localization.getDisplayName("description3")));
 
         this.page.appendChild(header);
         this.page.appendChild(comDiv);
