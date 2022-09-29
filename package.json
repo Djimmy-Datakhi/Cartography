@@ -12,7 +12,7 @@
     "@types/d3": "^5.0.0",
     "chroma-js": "^2.1.0",
     "core-js": "^3.2.1",
-    "d3": "^5.0.0",
+    "d3": "^7.6.1",
     "d3-geo": "^1.12.1",
     "powerbi-visuals-utils-dataviewutils": "2.2.1"
   },
